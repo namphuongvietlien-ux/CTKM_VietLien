@@ -1381,21 +1381,27 @@
           const kId = `${sId}_k_${slug(item.sku)}`;
 
           if (!processed.brands.has(bId)) {
-            groups.add({ id: bId, content: item.brand, className: 'vis-group-level-brand', nestedGroups: [] });
+            const brandGroup = { id: bId, content: item.brand, className: 'vis-group-level-brand', nestedGroups: [] };
+            groups.add(brandGroup);
+            console.log('Created brand group:', brandGroup);
             processed.brands.add(bId);
           }
 
           if (!processed.systems.has(sId)) {
-            groups.add({ id: sId, content: item.system, className: 'vis-group-level-system', nestedGroups: [] });
+            const systemGroup = { id: sId, content: item.system, className: 'vis-group-level-system', nestedGroups: [] };
+            groups.add(systemGroup);
             const g = groups.get(bId);
             if (g && g.nestedGroups) g.nestedGroups.push(sId);
+            console.log('Created system group:', systemGroup, 'under brand:', bId);
             processed.systems.add(sId);
           }
 
           if (!processed.skus.has(kId)) {
-            groups.add({ id: kId, content: item.sku, className: 'vis-group-level-sku' });
+            const skuGroup = { id: kId, content: item.sku, className: 'vis-group-level-sku' };
+            groups.add(skuGroup);
             const g2 = groups.get(sId);
             if (g2 && g2.nestedGroups) g2.nestedGroups.push(kId);
+            console.log('Created SKU group:', skuGroup, 'under system:', sId);
             processed.skus.add(kId);
           }
 
@@ -1407,11 +1413,13 @@
           if (!processed.systems.has(groupKey)) {
             // Hiển thị đầy đủ: SKU | System
             const label = `${item.sku} | ${item.system}`;
-            groups.add({ 
+            const flatGroup = { 
               id: groupKey, 
               content: label, 
               className: 'vis-group-level-sku'
-            });
+            };
+            groups.add(flatGroup);
+            console.log('Created flat SKU group:', flatGroup);
             processed.systems.add(groupKey);
           }
 
@@ -1508,7 +1516,28 @@
         }
       };
 
+      console.log('=== TIMELINE DEBUG ===');
+      console.log('Mode:', mode);
+      console.log('Total groups:', groups.length);
+      console.log('Total items:', items.length);
+      console.log('Groups data:', groups.get());
+      
       timeline = new vis.Timeline(container, items, groups, options);
+      
+      // Log sau khi timeline được tạo
+      setTimeout(() => {
+        const labels = document.querySelectorAll('.vis-label');
+        console.log('Rendered labels count:', labels.length);
+        labels.forEach((label, idx) => {
+          if (idx < 10) { // Log 10 labels đầu
+            console.log(`Label ${idx}:`, {
+              html: label.innerHTML,
+              classes: label.className,
+              visible: label.offsetHeight > 0
+            });
+          }
+        });
+      }, 500);
 
       timeline.on('select', p => {
         try {
