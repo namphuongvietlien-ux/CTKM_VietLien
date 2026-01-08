@@ -250,6 +250,37 @@
         font-size: 12px !important;
         padding: 4px !important;
       }
+
+      /* Guideline table responsive */
+      #guideline_table_body .btn-sm {
+        padding: 2px 4px !important;
+        font-size: 10px !important;
+      }
+
+      /* Guideline legend badges */
+      #breadcrumb_area .badge {
+        font-size: 9px !important;
+        padding: 2px 4px !important;
+        white-space: nowrap;
+      }
+
+      #breadcrumb_area .d-flex.gap-2 {
+        gap: 0.25rem !important;
+      }
+
+      /* Card responsive */
+      .card {
+        margin-bottom: 10px !important;
+      }
+
+      .card-header h6 {
+        font-size: 13px !important;
+      }
+
+      .alert {
+        font-size: 12px !important;
+        padding: 8px !important;
+      }
     }
 
     @media (max-width: 480px) {
@@ -290,6 +321,19 @@
       
       label {
         font-size: 12px !important;
+      }
+
+      /* Extra small screens - hide legend text */
+      #breadcrumb_area .badge {
+        font-size: 8px !important;
+        padding: 1px 3px !important;
+      }
+
+      /* Guideline table - smaller fonts */
+      #guideline_table_body td,
+      #guideline_table_body th {
+        font-size: 10px !important;
+        padding: 3px 2px !important;
       }
     }
 
@@ -880,25 +924,25 @@
             <div class="card-body">
               <form id="guidelineForm" onsubmit="saveGuidelineData(event)">
                 <div class="row g-3">
-                  <div class="col-md-2">
+                  <div class="col-12 col-md-3">
                     <label class="fw-bold">Hệ thống <span class="text-danger">*</span></label>
                     <select class="form-select" id="guideline_system" onchange="onGuidelineSystemChange()" required>
                       <option value="">-- Chọn --</option>
                     </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-12 col-md-3">
                     <label class="fw-bold">Nhãn <span class="text-danger">*</span></label>
                     <select class="form-select" id="guideline_brand" onchange="onGuidelineBrandChange()" required>
                       <option value="">-- Chọn --</option>
                     </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-12 col-md-3">
                     <label class="fw-bold">SKU <span class="text-danger">*</span></label>
                     <select class="form-select" id="guideline_sku" required>
                       <option value="">-- Chọn --</option>
                     </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-6 col-md-2">
                     <label class="fw-bold">Tháng <span class="text-danger">*</span></label>
                     <select class="form-select" id="guideline_month" required>
                       <option value="">-- Chọn --</option>
@@ -916,21 +960,21 @@
                       <option value="12">Tháng 12</option>
                     </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-6 col-md-1">
                     <label class="fw-bold">Năm <span class="text-danger">*</span></label>
                     <input type="number" class="form-control" id="guideline_year" placeholder="2026" min="2020" max="2099" required>
                   </div>
-                  <div class="col-md-2">
-                    <label class="fw-bold">&nbsp;</label>
+                </div>
+                <div class="row g-3 mt-1">
+                  <div class="col-12 col-md-10">
+                    <label class="fw-bold">Ghi chú</label>
+                    <input type="text" class="form-control" id="guideline_note" placeholder="Ghi chú (tùy chọn)">
+                  </div>
+                  <div class="col-12 col-md-2">
+                    <label class="fw-bold d-none d-md-block">&nbsp;</label>
                     <button type="submit" class="btn btn-success w-100">
                       <i class="fa-solid fa-save me-1"></i>Lưu
                     </button>
-                  </div>
-                </div>
-                <div class="row g-3 mt-1">
-                  <div class="col-md-12">
-                    <label class="fw-bold">Ghi chú</label>
-                    <input type="text" class="form-control" id="guideline_note" placeholder="Ghi chú (tùy chọn)">
                   </div>
                 </div>
               </form>
