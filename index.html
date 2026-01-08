@@ -1247,7 +1247,7 @@
       });
 
       timeline.on('doubleClick', p => {
-        if (p.items.length && p.items[0] !== 'highlight_bg') {
+        if (p.items && p.items.length && p.items[0] !== 'highlight_bg') {
           editItem(items.get(p.items[0]).dataItem);
         }
       });
