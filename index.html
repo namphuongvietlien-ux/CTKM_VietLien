@@ -1496,6 +1496,12 @@
         tooltip: {
           followMouse: false,
           overflowMethod: 'cap'
+        },
+        // Template để render HTML trong group labels
+        groupTemplate: function(group) {
+          const container = document.createElement('div');
+          container.innerHTML = group.content;
+          return container;
         }
       };
 
