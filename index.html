@@ -1445,9 +1445,16 @@
         skus:    new Set()
       };
 
-      data.sort((a, b) =>
-        a.brand.localeCompare(b.brand) || a.system.localeCompare(b.system)
-      );
+      // Sắp xếp theo mode: 'system' -> System trước, 'sku' -> SKU trước
+      if (mode === 'sku') {
+        data.sort((a, b) =>
+          a.sku.localeCompare(b.sku) || a.system.localeCompare(b.system)
+        );
+      } else {
+        data.sort((a, b) =>
+          a.system.localeCompare(b.system) || a.sku.localeCompare(b.sku)
+        );
+      }
 
       data.forEach((item, idx) => {
         if (!item.start_date) return;
