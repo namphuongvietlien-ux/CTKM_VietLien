@@ -113,11 +113,20 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 2px;
     }
-    .item-price .price-original {
+    .item-price del {
       font-size: 6px;
       text-decoration: line-through;
-      color: #6c757d;
+      color: #999;
+      font-weight: 400;
+    }
+    .item-price strong {
+      font-size: 7px;
+      color: #dc3545;
+      font-weight: 700;
     }
 
     /* CUSTOM TOOLTIP */
@@ -1376,38 +1385,23 @@
         // - 'system': Brand -> System -> SKU (existing behavior)
         // - 'sku': SKU -> System (under SKU)
         if (mode === 'system') {
-          const bId = `b_${slug(item.brand)}`;
-          const sId = `${bId}_s_${slug(item.system)}`;
-          const kId = `${sId}_k_${slug(item.sku)}`;
-
-          if (!processed.brands.has(bId)) {
-            const brandGroup = { id: bId, content: item.brand, className: 'vis-group-level-brand', nestedGroups: [] };
-            groups.add(brandGroup);
-            console.log('Created brand group:', brandGroup);
-            processed.brands.add(bId);
+          // Flat structure: System | SKU để dễ nhìn
+          const groupKey = `sys_${slug(item.system)}_sku_${slug(item.sku)}`;
+          
+          if (!processed.systems.has(groupKey)) {
+            // Hiển thị: System | SKU
+            const label = `${item.system} | ${item.sku}`;
+            const flatGroup = { 
+              id: groupKey, 
+              content: label, 
+              className: 'vis-group-level-system'
+            };
+            groups.add(flatGroup);
+            console.log('Created flat System group:', flatGroup);
+            processed.systems.add(groupKey);
           }
 
-          if (!processed.systems.has(sId)) {
-            const systemGroup = { id: sId, content: item.system, className: 'vis-group-level-system', nestedGroups: [] };
-            groups.add(systemGroup);
-            const g = groups.get(bId);
-            if (g && g.nestedGroups) g.nestedGroups.push(sId);
-            console.log('Created system group:', systemGroup, 'under brand:', bId);
-            processed.systems.add(sId);
-          }
-
-          if (!processed.skus.has(kId)) {
-            // Hiển thị SKU với System name để dễ phân biệt
-            const skuLabel = `${item.sku} (${item.system})`;
-            const skuGroup = { id: kId, content: skuLabel, className: 'vis-group-level-sku' };
-            groups.add(skuGroup);
-            const g2 = groups.get(sId);
-            if (g2 && g2.nestedGroups) g2.nestedGroups.push(kId);
-            console.log('Created SKU group:', skuGroup, 'under system:', sId);
-            processed.skus.add(kId);
-          }
-
-          item._groupId = `${sId}_k_${slug(item.sku)}`; // group id used for item
+          item._groupId = groupKey;
         } else if (mode === 'sku') {
           // Flat structure: mỗi SKU + System là một group riêng
           const groupKey = `sku_${slug(item.sku)}_sys_${slug(item.system)}`;
@@ -1447,7 +1441,7 @@
 
         const priceHtml = priceRaw > 0
           ? (hasDis
-              ? `<div class="item-price"><span class="price-original">${fmt(priceRaw)}</span> → ${fmt(final)}</div>`
+              ? `<div class="item-price"><del style="text-decoration:line-through;color:#999;font-size:6px;">${fmt(priceRaw)}</del> <strong style="color:#dc3545;">${fmt(final)}</strong></div>`
               : `<div class="item-price">${fmt(priceRaw)}</div>`
             )
           : '';
