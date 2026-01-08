@@ -72,6 +72,17 @@
       border-width: 1px;
       overflow: hidden;
     }
+    .vis-item-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 4px 5px;
+      line-height: 1.2;
+      overflow: visible !important;
+      height: 100%;
+      gap: 1px;
+    }
     .item-content {
       display: flex;
       flex-direction: column;
@@ -91,40 +102,43 @@
     }
     .item-sku {
       font-weight: 700;
-      font-size: 8px;
+      font-size: 9px;
       color: #0d6efd;
-      margin: 1px 0;
+      margin: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      max-width: 100%;
     }
     .item-promo {
-      font-size: 7px;
+      font-size: 8px;
       color: #333;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      max-width: 100%;
     }
     .item-price {
       font-weight: 700;
       color: #dc3545;
-      font-size: 7px;
-      margin-top: 1px;
+      font-size: 8px;
+      margin-top: 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
+      max-width: 100%;
     }
     .item-price del {
-      font-size: 6px;
+      font-size: 7px;
       text-decoration: line-through;
-      color: #999;
+      color: #888;
       font-weight: 400;
     }
     .item-price strong {
-      font-size: 7px;
+      font-size: 8px;
       color: #dc3545;
       font-weight: 700;
     }
@@ -1441,19 +1455,13 @@
 
         const priceHtml = priceRaw > 0
           ? (hasDis
-              ? `<div class="item-price"><del style="text-decoration:line-through;color:#999;font-size:6px;">${fmt(priceRaw)}</del> <strong style="color:#dc3545;">${fmt(final)}</strong></div>`
-              : `<div class="item-price">${fmt(priceRaw)}</div>`
+              ? `<div class="item-price"><del style="text-decoration:line-through;color:#888;font-size:7px;">${fmt(priceRaw)}</del> <strong style="color:#dc3545;font-size:8px;">${fmt(final)}</strong></div>`
+              : `<div class="item-price" style="font-size:8px;">${fmt(priceRaw)}</div>`
             )
           : '';
 
         // Rút gọn nội dung: chỉ hiển thị SKU + promo + giá
-        const contentHtml = `
-          <div class="item-content">
-            <div class="item-sku" title="${item.sku}">${item.sku}</div>
-            <div class="item-promo">${item.promotion}</div>
-            ${priceHtml}
-          </div>
-        `;
+        const contentHtml = `<div class="item-sku" title="${item.sku}">${item.sku}</div><div class="item-promo">${item.promotion}</div>${priceHtml}`;
 
         // Tooltip đầy đủ thông tin (HTML format)
         const tooltipLines = [
