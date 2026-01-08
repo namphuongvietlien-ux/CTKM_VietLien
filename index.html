@@ -1517,8 +1517,8 @@
             )
           : '';
 
-        // Rút gọn nội dung: chỉ hiển thị SKU + promo + giá
-        const contentHtml = `<div class="item-sku" title="${item.sku}">${item.sku}</div><div class="item-promo">${item.promotion}</div>${priceHtml}`;
+        // Rút gọn nội dung: chỉ hiển thị promo + giá (bỏ SKU vì đã có trong label)
+        const contentHtml = `<div class="item-promo">${item.promotion}</div>${priceHtml}`;
 
         // Tooltip đầy đủ thông tin (HTML format)
         const tooltipLines = [
