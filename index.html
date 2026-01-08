@@ -436,6 +436,9 @@
           </select>
         </div>
         <div>
+        <button class="btn btn-success fw-bold shadow-sm me-2" onclick="openGuidelineModal()">
+          <i class="fa-solid fa-book"></i> GUIDELINE
+        </button>
         <button class="btn btn-info fw-bold shadow-sm me-2" onclick="openPrintTimelineModal()">
           <i class="fa-solid fa-file-pdf"></i> IN TIMELINE
         </button>
@@ -448,10 +451,15 @@
         </div>
       </div>
     </div>
-    <div id="breadcrumb_area" class="mb-2 ps-2" style="min-height:26px; background:#f8f9fa; border-left:3px solid #0d6efd; border-radius:2px">
+    <div id="breadcrumb_area" class="mb-2 ps-2 d-flex justify-content-between align-items-center flex-wrap" style="min-height:26px; background:#f8f9fa; border-left:3px solid #0d6efd; border-radius:2px; padding-right: 8px;">
       <small id="breadcrumb" class="text-secondary" style="font-size:13px">
         <i class="fa-solid fa-sitemap me-1"></i>Hệ thống → SKU → Timeline
       </small>
+      <div class="d-flex gap-2 align-items-center" style="font-size: 10px;">
+        <span class="badge" style="background-color: #e7f1ff; color: #000; border: 1px solid #0d6efd; padding: 3px 6px;">Không guideline</span>
+        <span class="badge" style="background-color: #d4edda; color: #000; border: 1px solid #28a745; padding: 3px 6px;">✓ Đúng guideline</span>
+        <span class="badge" style="background-color: #fff3cd; color: #000; border: 1px solid #ffc107; padding: 3px 6px;">⚠ Sai guideline</span>
+      </div>
     </div>
     <div id="visualization"></div>
   </div>
@@ -843,6 +851,113 @@
     </div>
   </div>
 
+  <!-- GUIDELINE MODAL -->
+  <div class="modal fade" id="guidelineModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title fw-bold">
+            <i class="fa-solid fa-book me-2"></i>Quản Lý Guideline CTKM
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-12">
+              <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                <strong>Guideline</strong> là kế hoạch CTKM theo SKU và tháng/năm, áp dụng cho tất cả hệ thống. 
+                Khi có guideline, timeline sẽ tô màu để nhận biết SKU nào đang chạy đúng/sai guideline.
+              </div>
+            </div>
+          </div>
+          
+          <!-- Form thêm guideline -->
+          <div class="card mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fa-solid fa-plus-circle me-2"></i>Thêm/Cập nhật Guideline</h6>
+            </div>
+            <div class="card-body">
+              <form id="guidelineForm" onsubmit="saveGuidelineData(event)">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="fw-bold">SKU <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="guideline_sku" placeholder="Nhập SKU" required>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="fw-bold">Tháng <span class="text-danger">*</span></label>
+                    <select class="form-select" id="guideline_month" required>
+                      <option value="">-- Chọn --</option>
+                      <option value="1">Tháng 1</option>
+                      <option value="2">Tháng 2</option>
+                      <option value="3">Tháng 3</option>
+                      <option value="4">Tháng 4</option>
+                      <option value="5">Tháng 5</option>
+                      <option value="6">Tháng 6</option>
+                      <option value="7">Tháng 7</option>
+                      <option value="8">Tháng 8</option>
+                      <option value="9">Tháng 9</option>
+                      <option value="10">Tháng 10</option>
+                      <option value="11">Tháng 11</option>
+                      <option value="12">Tháng 12</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="fw-bold">Năm <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="guideline_year" placeholder="2026" min="2020" max="2099" required>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="fw-bold">Ghi chú</label>
+                    <input type="text" class="form-control" id="guideline_note" placeholder="Ghi chú (tùy chọn)">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="fw-bold">&nbsp;</label>
+                    <button type="submit" class="btn btn-success w-100">
+                      <i class="fa-solid fa-save me-1"></i>Lưu
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Bảng hiển thị guideline -->
+          <div class="card">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="fa-solid fa-list me-2"></i>Danh sách Guideline</h6>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-sm table-hover mb-0">
+                  <thead class="table-light sticky-top">
+                    <tr>
+                      <th style="width: 5%">#</th>
+                      <th style="width: 25%">SKU</th>
+                      <th style="width: 15%">Tháng</th>
+                      <th style="width: 15%">Năm</th>
+                      <th style="width: 30%">Ghi chú</th>
+                      <th style="width: 10%">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="guideline_table_body">
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-4">
+                        <i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -855,6 +970,7 @@
 
     let masterData = {},
       currentList = [],
+      guidelineData = [],
       flatpickrInstance,
       timeline;
 
@@ -866,6 +982,7 @@
     const modalPrint  = new bootstrap.Modal(document.getElementById('printModal'));
     const modalReport = new bootstrap.Modal(document.getElementById('reportModal'));
     const modalTimelinePrint = new bootstrap.Modal(document.getElementById('printTimelineModal'));
+    const modalGuideline = new bootstrap.Modal(document.getElementById('guidelineModal'));
 
     document.addEventListener('DOMContentLoaded', async () => {
       flatpickrInstance = flatpickr("#date_range", {
@@ -875,6 +992,7 @@
       });
 
       await fetchMasterData();
+      await fetchGuidelineData(); // Load guideline data
       await fetchList();
 
       const d = new Date();
@@ -1053,6 +1171,10 @@
         // Choose the group id that was computed above depending on mode
         const groupId = item._groupId || (`${slug(item.brand)}_${slug(item.system)}_${slug(item.sku)}`);
 
+        // Lấy màu sắc dựa trên guideline compliance
+        const colors = getItemColorByGuideline(item);
+        const itemStyle = `background-color: ${colors.background}; border-color: ${colors.border}; border-width: 2px;`;
+
         items.add({
           id: idx,
           group: groupId,
@@ -1061,7 +1183,8 @@
           end: end,
           type: 'range',
           title: tooltip,
-          dataItem: { ...item, realStart: start, realEnd: end }
+          dataItem: { ...item, realStart: start, realEnd: end },
+          style: itemStyle
         });
       });
 
@@ -2782,6 +2905,226 @@
       if (!d) return '';
       const dt = new Date(d);
       return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
+    }
+
+    // ============================================
+    // GUIDELINE MANAGEMENT FUNCTIONS
+    // ============================================
+
+    /**
+     * Mở modal Guideline và load dữ liệu
+     */
+    async function openGuidelineModal() {
+      modalGuideline.show();
+      await fetchGuidelineData();
+    }
+
+    /**
+     * Tải dữ liệu guideline từ server
+     */
+    async function fetchGuidelineData() {
+      try {
+        const tbody = document.getElementById('guideline_table_body');
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải...</td></tr>';
+        }
+
+        const response = await fetch(`${API_URL}?action=guideline&t=${Date.now()}`);
+        const data = await response.json();
+
+        if (data.success) {
+          guidelineData = data.data || [];
+          if (tbody) {
+            renderGuidelineTable();
+          }
+        } else {
+          if (tbody) {
+            alert('Lỗi tải guideline: ' + (data.error || 'Unknown'));
+          }
+          console.warn('fetchGuidelineData error:', data.error);
+        }
+      } catch (error) {
+        console.warn('fetchGuidelineData error:', error);
+        // Không alert để tránh gián đoạn khi load trang
+      }
+    }
+
+    /**
+     * Hiển thị bảng guideline
+     */
+    function renderGuidelineTable() {
+      const tbody = document.getElementById('guideline_table_body');
+      
+      if (!guidelineData || guidelineData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Chưa có guideline nào</td></tr>';
+        return;
+      }
+
+      // Sắp xếp theo năm, tháng, SKU
+      guidelineData.sort((a, b) => {
+        const yearDiff = parseInt(b.year) - parseInt(a.year);
+        if (yearDiff !== 0) return yearDiff;
+        const monthDiff = parseInt(b.month) - parseInt(a.month);
+        if (monthDiff !== 0) return monthDiff;
+        return (a.sku || '').localeCompare(b.sku || '');
+      });
+
+      let html = '';
+      guidelineData.forEach((item, index) => {
+        html += `
+          <tr>
+            <td class="text-center">${index + 1}</td>
+            <td><strong>${item.sku}</strong></td>
+            <td class="text-center">Tháng ${item.month}</td>
+            <td class="text-center">${item.year}</td>
+            <td>${item.note || '<span class="text-muted">--</span>'}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-danger" onclick="deleteGuidelineItem('${item.sku}', '${item.month}', '${item.year}')" title="Xóa">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    /**
+     * Lưu guideline (thêm mới hoặc cập nhật)
+     */
+    async function saveGuidelineData(event) {
+      event.preventDefault();
+
+      const sku = document.getElementById('guideline_sku').value.trim();
+      const month = document.getElementById('guideline_month').value;
+      const year = document.getElementById('guideline_year').value;
+      const note = document.getElementById('guideline_note').value.trim();
+
+      if (!sku || !month || !year) {
+        alert('Vui lòng nhập đầy đủ SKU, Tháng và Năm!');
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'save_guideline',
+            data: { sku, month, year, note }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(data.data.message || 'Đã lưu guideline!');
+          document.getElementById('guidelineForm').reset();
+          await fetchGuidelineData();
+          await fetchList(); // Reload timeline để cập nhật màu sắc
+        } else {
+          alert('Lỗi: ' + (data.error || 'Unknown'));
+        }
+      } catch (error) {
+        alert('Lỗi: ' + error.message);
+        console.error('saveGuidelineData error:', error);
+      }
+    }
+
+    /**
+     * Xóa guideline
+     */
+    async function deleteGuidelineItem(sku, month, year) {
+      if (!confirm(`Xóa guideline cho SKU "${sku}" tháng ${month}/${year}?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'delete_guideline',
+            data: { sku, month, year }
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(data.data.message || 'Đã xóa guideline!');
+          await fetchGuidelineData();
+          await fetchList(); // Reload timeline để cập nhật màu sắc
+        } else {
+          alert('Lỗi: ' + (data.error || 'Unknown'));
+        }
+      } catch (error) {
+        alert('Lỗi: ' + error.message);
+        console.error('deleteGuidelineItem error:', error);
+      }
+    }
+
+    /**
+     * Kiểm tra SKU có tuân thủ guideline hay không
+     * @param {string} sku - SKU code
+     * @param {string} month - Month (format: "THÁNG 1" hoặc "1")
+     * @param {string} year - Year
+     * @returns {boolean|null} - true nếu có promo đúng guideline, false nếu có guideline nhưng không có promo, null nếu không có guideline
+     */
+    function checkSkuHasGuideline(sku, month, year) {
+      if (!guidelineData || guidelineData.length === 0) return null;
+
+      // Parse month number from "THÁNG 1" format
+      let monthNum = month;
+      if (typeof month === 'string' && month.includes('THÁNG')) {
+        monthNum = month.replace('THÁNG', '').trim();
+      }
+
+      // Tìm guideline
+      const guideline = guidelineData.find(g => 
+        clean(g.sku) === clean(sku) &&
+        String(g.month) === String(monthNum) &&
+        String(g.year) === String(year)
+      );
+
+      if (!guideline) return null; // Không có guideline
+
+      // Có guideline - kiểm tra xem có CTKM thực tế trong Data_CTKM không
+      const hasPromo = currentList.some(item => 
+        clean(item.sku) === clean(sku) &&
+        String(item.month).includes(String(monthNum)) &&
+        String(item.year) === String(year)
+      );
+
+      return hasPromo;
+    }
+
+    /**
+     * Lấy màu cho item dựa trên guideline compliance
+     * @returns {object} - { background, border } colors
+     */
+    function getItemColorByGuideline(item) {
+      const monthNum = getMonthNumber(item.month);
+      const compliance = checkSkuHasGuideline(item.sku, monthNum, item.year);
+
+      if (compliance === null) {
+        // Không có guideline - màu mặc định (xanh dương)
+        return {
+          background: '#e7f1ff',
+          border: '#0d6efd'
+        };
+      } else if (compliance === true) {
+        // Đúng guideline - màu xanh lá
+        return {
+          background: '#d4edda',
+          border: '#28a745'
+        };
+      } else {
+        // Sai guideline - màu đỏ/cam
+        return {
+          background: '#fff3cd',
+          border: '#ffc107'
+        };
+      }
     }
   </script>
 </body>

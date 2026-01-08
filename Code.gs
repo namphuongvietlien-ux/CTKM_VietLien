@@ -2,6 +2,7 @@ const DATA_SHEET = 'Data_CTKM';
 const TIMELINE_SHEET = 'Timeline';
 const MASTERDATA_SHEET = 'MasterData';
 const SALES_SHEET = 'DATA_MASTER';
+const GUIDELINE_SHEET = 'Guideline_CTKM';
 
 function doGet(e) {
   if (!e || !e.parameter || !e.parameter.action) {
@@ -18,6 +19,8 @@ function doGet(e) {
         return jsonSuccess(listCtkm());
       case 'masterdata':
         return jsonSuccess(loadMasterData());
+      case 'guideline':
+        return jsonSuccess(loadGuidelineData());
       default:
         return jsonSuccess([]);
     }
@@ -36,6 +39,8 @@ function doPost(e) {
     if (action === 'save_timeline_pdf') return jsonSuccess(saveTimelinePdf(payload.data));
     if (action === 'report')       return jsonSuccess(getCtkmReport(payload.data.name));
     if (action === 'update_timeline') return jsonSuccess(updateTimeline(payload.data));
+    if (action === 'save_guideline') return jsonSuccess(saveGuideline(payload.data));
+    if (action === 'delete_guideline') return jsonSuccess(deleteGuideline(payload.data));
     return jsonError('Unknown action');
   } catch (err) {
     return jsonError(err.toString());
@@ -1251,4 +1256,168 @@ function createTimelineHtml(payload) {
         </div>
       </body>
     </html>`;
+}
+
+// ============================================
+// GUIDELINE MANAGEMENT FUNCTIONS
+// ============================================
+
+/**
+ * Tải dữ liệu Guideline từ sheet Guideline_CTKM
+ * Sheet có cấu trúc: SKU | Tháng | Năm | Ghi chú
+ */
+function loadGuidelineData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(GUIDELINE_SHEET);
+  
+  // Tạo sheet mới nếu chưa có
+  if (!sheet) {
+    sheet = ss.insertSheet(GUIDELINE_SHEET);
+    sheet.getRange('A1:D1').setValues([['SKU', 'Tháng', 'Năm', 'Ghi chú']]);
+    sheet.getRange('A1:D1').setFontWeight('bold').setBackground('#4CAF50').setFontColor('#ffffff');
+    return [];
+  }
+  
+  const values = sheet.getDataRange().getValues();
+  const guidelines = [];
+  
+  for (let i = 1; i < values.length; i++) {
+    if (!values[i][0]) continue; // Skip empty rows
+    
+    guidelines.push({
+      sku: String(values[i][0] || '').trim(),
+      month: String(values[i][1] || '').trim(),
+      year: String(values[i][2] || '').trim(),
+      note: String(values[i][3] || '').trim()
+    });
+  }
+  
+  return guidelines;
+}
+
+/**
+ * Lưu Guideline mới hoặc cập nhật guideline hiện có
+ * data: { sku, month, year, note }
+ */
+function saveGuideline(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(GUIDELINE_SHEET);
+  
+  // Tạo sheet mới nếu chưa có
+  if (!sheet) {
+    sheet = ss.insertSheet(GUIDELINE_SHEET);
+    sheet.getRange('A1:D1').setValues([['SKU', 'Tháng', 'Năm', 'Ghi chú']]);
+    sheet.getRange('A1:D1').setFontWeight('bold').setBackground('#4CAF50').setFontColor('#ffffff');
+  }
+  
+  const sku = String(data.sku || '').trim();
+  const month = String(data.month || '').trim();
+  const year = String(data.year || '').trim();
+  const note = String(data.note || '').trim();
+  
+  if (!sku || !month || !year) {
+    return { error: 'Thiếu thông tin SKU, Tháng hoặc Năm!' };
+  }
+  
+  const values = sheet.getDataRange().getValues();
+  let rowIdx = -1;
+  
+  // Tìm dòng có cùng SKU + Tháng + Năm
+  for (let i = 1; i < values.length; i++) {
+    if (
+      cleanStr(values[i][0]) === cleanStr(sku) &&
+      String(values[i][1]).trim() === month &&
+      String(values[i][2]).trim() === year
+    ) {
+      rowIdx = i + 1;
+      break;
+    }
+  }
+  
+  const row = [sku, month, year, note];
+  
+  if (rowIdx > 0) {
+    // Cập nhật dòng hiện có
+    sheet.getRange(rowIdx, 1, 1, row.length).setValues([row]);
+    return { message: 'Đã cập nhật guideline!' };
+  } else {
+    // Thêm dòng mới
+    sheet.appendRow(row);
+    return { message: 'Đã thêm guideline mới!' };
+  }
+}
+
+/**
+ * Xóa Guideline
+ * data: { sku, month, year }
+ */
+function deleteGuideline(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(GUIDELINE_SHEET);
+  
+  if (!sheet) {
+    return { error: 'Không tìm thấy sheet Guideline!' };
+  }
+  
+  const sku = String(data.sku || '').trim();
+  const month = String(data.month || '').trim();
+  const year = String(data.year || '').trim();
+  
+  const values = sheet.getDataRange().getValues();
+  
+  for (let i = 1; i < values.length; i++) {
+    if (
+      cleanStr(values[i][0]) === cleanStr(sku) &&
+      String(values[i][1]).trim() === month &&
+      String(values[i][2]).trim() === year
+    ) {
+      sheet.deleteRow(i + 1);
+      return { message: 'Đã xóa guideline!' };
+    }
+  }
+  
+  return { error: 'Không tìm thấy guideline để xóa!' };
+}
+
+/**
+ * Kiểm tra SKU có tuân thủ guideline hay không
+ * Trả về: { compliant: true/false, guideline: {...}, actual: {...} }
+ */
+function checkSkuCompliance(sku, month, year) {
+  const guidelines = loadGuidelineData();
+  const skuClean = cleanStr(sku);
+  
+  // Tìm guideline tương ứng
+  const guideline = guidelines.find(g => 
+    cleanStr(g.sku) === skuClean &&
+    String(g.month).trim() === String(month).trim() &&
+    String(g.year).trim() === String(year).trim()
+  );
+  
+  if (!guideline) {
+    return { compliant: null, guideline: null, actual: null }; // Không có guideline
+  }
+  
+  // Lấy CTKM thực tế từ Data_CTKM
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const dS = ss.getSheetByName(DATA_SHEET);
+  const dVals = dS.getDataRange().getValues();
+  
+  let hasPromo = false;
+  
+  for (let i = 1; i < dVals.length; i++) {
+    const row = dVals[i];
+    if (cleanStr(row[3]) === skuClean && 
+        String(row[0]).includes(`THÁNG ${month}`) &&
+        String(row[1]).trim() === year) {
+      hasPromo = true;
+      break;
+    }
+  }
+  
+  return {
+    compliant: hasPromo,
+    guideline: guideline,
+    actual: { sku, month, year, hasPromo }
+  };
 }
