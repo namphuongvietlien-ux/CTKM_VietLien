@@ -880,9 +880,23 @@
             <div class="card-body">
               <form id="guidelineForm" onsubmit="saveGuidelineData(event)">
                 <div class="row g-3">
-                  <div class="col-md-3">
+                  <div class="col-md-2">
+                    <label class="fw-bold">Hệ thống <span class="text-danger">*</span></label>
+                    <select class="form-select" id="guideline_system" onchange="onGuidelineSystemChange()" required>
+                      <option value="">-- Chọn --</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="fw-bold">Nhãn <span class="text-danger">*</span></label>
+                    <select class="form-select" id="guideline_brand" onchange="onGuidelineBrandChange()" required>
+                      <option value="">-- Chọn --</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
                     <label class="fw-bold">SKU <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="guideline_sku" placeholder="Nhập SKU" required>
+                    <select class="form-select" id="guideline_sku" required>
+                      <option value="">-- Chọn --</option>
+                    </select>
                   </div>
                   <div class="col-md-2">
                     <label class="fw-bold">Tháng <span class="text-danger">*</span></label>
@@ -906,15 +920,17 @@
                     <label class="fw-bold">Năm <span class="text-danger">*</span></label>
                     <input type="number" class="form-control" id="guideline_year" placeholder="2026" min="2020" max="2099" required>
                   </div>
-                  <div class="col-md-3">
-                    <label class="fw-bold">Ghi chú</label>
-                    <input type="text" class="form-control" id="guideline_note" placeholder="Ghi chú (tùy chọn)">
-                  </div>
                   <div class="col-md-2">
                     <label class="fw-bold">&nbsp;</label>
                     <button type="submit" class="btn btn-success w-100">
                       <i class="fa-solid fa-save me-1"></i>Lưu
                     </button>
+                  </div>
+                </div>
+                <div class="row g-3 mt-1">
+                  <div class="col-md-12">
+                    <label class="fw-bold">Ghi chú</label>
+                    <input type="text" class="form-control" id="guideline_note" placeholder="Ghi chú (tùy chọn)">
                   </div>
                 </div>
               </form>
@@ -2916,7 +2932,65 @@
      */
     async function openGuidelineModal() {
       modalGuideline.show();
+      populateGuidelineSystemDropdown();
       await fetchGuidelineData();
+    }
+
+    /**
+     * Populate Hệ thống dropdown cho guideline form
+     */
+    function populateGuidelineSystemDropdown() {
+      const select = document.getElementById('guideline_system');
+      select.innerHTML = '<option value="">-- Chọn hệ thống --</option>';
+      
+      const systems = Object.keys(masterData).sort();
+      systems.forEach(sys => {
+        select.innerHTML += `<option value="${sys}">${sys}</option>`;
+      });
+    }
+
+    /**
+     * Khi chọn hệ thống trong guideline form
+     */
+    function onGuidelineSystemChange() {
+      const system = document.getElementById('guideline_system').value;
+      const brandSelect = document.getElementById('guideline_brand');
+      const skuSelect = document.getElementById('guideline_sku');
+      
+      // Reset brand và sku
+      brandSelect.innerHTML = '<option value="">-- Chọn nhãn --</option>';
+      skuSelect.innerHTML = '<option value="">-- Chọn SKU --</option>';
+      
+      if (!system || !masterData[system]) return;
+      
+      // Populate brands
+      const brands = Object.keys(masterData[system]).sort();
+      brands.forEach(brand => {
+        brandSelect.innerHTML += `<option value="${brand}">${brand}</option>`;
+      });
+    }
+
+    /**
+     * Khi chọn nhãn trong guideline form
+     */
+    function onGuidelineBrandChange() {
+      const system = document.getElementById('guideline_system').value;
+      const brand = document.getElementById('guideline_brand').value;
+      const skuSelect = document.getElementById('guideline_sku');
+      
+      // Reset sku
+      skuSelect.innerHTML = '<option value="">-- Chọn SKU --</option>';
+      
+      if (!system || !brand || !masterData[system] || !masterData[system][brand]) return;
+      
+      // Populate SKUs
+      const skus = masterData[system][brand];
+      skus.forEach(item => {
+        const skuVal = String(item.sku || '').trim();
+        const nameVal = String(item.name || '').trim();
+        const displayText = nameVal ? `${skuVal} - ${nameVal}` : skuVal;
+        skuSelect.innerHTML += `<option value="${skuVal}">${displayText}</option>`;
+      });
     }
 
     /**
