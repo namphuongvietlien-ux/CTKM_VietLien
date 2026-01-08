@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý CTKM</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link href="https://unpkg.com/vis-timeline/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <style>
+    /* UI FIX */
+    select, option, .form-select, .form-control {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+    .main-interface {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #visualization {
+      flex: 1;
+      width: 100%;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TIMELINE HEADER */
+    .vis-time-axis .vis-text.vis-major {
+      font-weight: 800;
+      font-size: 16px;
+      color: #B71C1C;
+      top: 3px;
+    }
+    .vis-time-axis .vis-text.vis-minor {
+      font-weight: 700;
+      font-size: 13px;
+      color: #0D47A1;
+    }
+    .vis-panel.vis-top, .vis-time-axis {
+      background-color: #f1f3f5;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    /* ITEM STYLE */
+    .vis-item {
+      border-color: #0d6efd;
+      background-color: #e7f1ff;
+      color: #000;
+      border-radius: 2px;
+      font-size: 12px;
+      border-width: 1px;
+    }
+    .item-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4px;
+      line-height: 1.2;
+    }
+    .item-sys {
+      font-weight: bold;
+      color: #d63384;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .item-sku {
+      font-weight: bold;
+      font-size: 13px;
+      color: #0d6efd;
+      margin: 1px 0;
+    }
+    .item-promo {
+      font-size: 11px;
+      color: #333;
+    }
+    .item-price {
+      font-weight: bold;
+      color: #dc3545;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    /* LINES */
+    .vis-custom-time {
+      background-color: #dc3545 !important;
+      width: 2px !important;
+      z-index: 999;
+      pointer-events: none;
+    }
+    .vis-custom-time .vis-custom-time-marker {
+      background-color: #dc3545 !important;
+      color: white !important;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 3px;
+      top: -35px !important;
+      transform: translateX(-50%);
+      border: none;
+    }
+    .vis-item.vis-background.range-highlight {
+      background-color: rgba(220, 53, 69, 0.1) !important;
+      border: none;
+      z-index: 0;
+    }
+
+    /* PRINT CSS */
+    #printArea { display: none; }
+
+    /* ===== MOBILE RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      html, body {
+        height: auto;
+        overflow-y: auto;
+      }
+      .main-interface {
+        height: auto;
+        min-height: 100vh;
+        padding: 8px;
+        flex-direction: column;
+      }
+      
+      /* Header responsive */
+      .d-flex.justify-content-between {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      
+      h3 {
+        font-size: 18px !important;
+        text-align: center;
+      }
+      
+      #visualization {
+        flex: none;
+        height: 400px;
+        margin-bottom: 15px;
+      }
+      
+      /* Button responsive */
+      .btn {
+        font-size: 12px !important;
+        padding: 6px 8px !important;
+        white-space: nowrap;
+      }
+      
+      .btn i {
+        margin-right: 4px;
+      }
+      
+      /* Select dropdown responsive */
+      #view_mode_select {
+        font-size: 12px !important;
+        padding: 6px !important;
+      }
+      
+      #view_mode_label {
+        display: none;
+      }
+      
+      /* Breadcrumb responsive */
+      #breadcrumb_area {
+        font-size: 12px !important;
+        padding: 8px !important;
+        margin-bottom: 10px !important;
+      }
+      
+      /* Modal responsive */
+      .modal-dialog {
+        margin: 10px !important;
+      }
+      
+      .modal-lg, .modal-xl {
+        max-width: 95vw !important;
+      }
+      
+      .modal-body {
+        padding: 10px !important;
+      }
+      
+      /* Form responsive */
+      .col-md-4 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 10px !important;
+      }
+      
+      .form-select, .form-control, .form-control-sm {
+        font-size: 13px !important;
+        padding: 8px !important;
+      }
+      
+      label {
+        font-size: 13px !important;
+        margin-bottom: 4px !important;
+      }
+      
+      /* Table responsive - Stack on mobile */
+      .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .table-sm {
+        font-size: 11px !important;
+      }
+      
+      .table-sm th,
+      .table-sm td {
+        padding: 4px 2px !important;
+      }
+      
+      .table thead {
+        position: relative;
+      }
+      
+      /* SKU input table */
+      #sku_input_area {
+        padding: 8px !important;
+        margin-bottom: 10px !important;
+      }
+      
+      #sku_input_area .table {
+        margin-bottom: 0 !important;
+        font-size: 11px !important;
+      }
+      
+      #sku_input_area input {
+        font-size: 12px !important;
+        padding: 4px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h3 {
+        font-size: 16px !important;
+      }
+      
+      #visualization {
+        height: 300px;
+      }
+      
+      .btn {
+        font-size: 11px !important;
+        padding: 5px 6px !important;
+      }
+      
+      .btn i {
+        margin-right: 3px;
+      }
+      
+      #breadcrumb_area {
+        font-size: 11px !important;
+      }
+      
+      .modal-dialog {
+        max-width: 100vw !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+      }
+      
+      .modal-content {
+        border-radius: 0 !important;
+      }
+      
+      .form-select, .form-control {
+        font-size: 12px !important;
+      }
+      
+      label {
+        font-size: 12px !important;
+      }
+    }
+
+    @media print {
+      .main-interface, .modal, .modal-backdrop {
+        display: none !important;
+      }
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto;
+        overflow: visible;
+        background: #fff !important;
+      }
+      #printArea {
+        display: flex !important;
+        flex-direction: column;
+        font-family: 'Times New Roman', serif;
+        color: #000;
+        width: 100%;
+        padding: 2.5cm;
+        box-sizing: border-box;
+      }
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
+      .print-title h2 {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        margin-bottom: 20px;
+        font-size: 11px;
+        table-layout: auto;
+      }
+      .print-table th,
+      .print-table td {
+        white-space: nowrap;
+        overflow: visible;
+      }
+      .print-table th:nth-child(3),
+      .print-table td:nth-child(3) {
+        white-space: normal;
+        word-wrap: break-word;
+      }
+      .print-table th:nth-child(6),
+      .print-table td:nth-child(6) {
+        white-space: normal;
+        word-wrap: break-word;
+      }
+      .print-table th:nth-child(10),
+      .print-table td:nth-child(10) {
+        white-space: normal;
+        word-wrap: break-word;
+      }
+      .print-table th,
+      .print-table td {
+        border: 1px solid #000 !important;
+        padding: 6px 4px;
+        vertical-align: middle;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+      }
+      .print-table th {
+        background-color: #f3f3f3 !important;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: center;
+        font-size: 11px;
+        padding: 10px 6px;
+      }
+      .print-table td {
+        font-size: 11px;
+        min-height: 25px;
+        height: 25px;
+        padding: 8px 6px;
+      }
+      .print-table tbody tr {
+        min-height: 25px;
+        height: 25px;
+      }
+      .text-end { text-align: right !important; }
+      .text-center { text-align: center !important; }
+      .fw-bold { font-weight: bold !important; }
+      .signature-section {
+        margin-top: 50px;
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
+        page-break-inside: avoid;
+        width: 100%;
+        padding: 0 5%;
+      }
+      .signature-box {
+        flex: 0 0 auto;
+        text-align: center;
+        min-height: 200px;
+        width: 30%;
+        max-width: 200px;
+      }
+      .signature-label {
+        font-weight: bold;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-bottom: 120px;
+        display: block;
+        line-height: 1.5;
+      }
+      .signature-name {
+        font-weight: bold;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-top: 5px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-interface">
+    <div class="d-flex justify-content-between align-items-center mb-2" style="height: 40px;">
+      <h3 class="text-primary fw-bold m-0">
+        <i class="fa-solid fa-timeline"></i> Quản Lý CTKM
+      </h3>
+      <div class="d-flex align-items-center gap-2">
+        <div class="me-2 d-flex align-items-center">
+          <select id="view_mode_select" class="form-select form-select-sm me-2" onchange="onViewModeChange()" title="Chọn cách hiển thị">
+            <option value="system">Hệ thống → SKU → Timeline</option>
+            <option value="sku">SKU → Hệ thống → Timeline</option>
+          </select>
+          <small id="view_mode_label" class="me-2 text-muted" style="font-size:12px">Hệ thống → SKU → Timeline</small>
+
+          <!-- System filter -->
+          <select id="system_filter_select" class="form-select form-select-sm" onchange="onSystemFilterChange()" title="Lọc theo hệ thống">
+            <option value="">-- Tất cả hệ thống --</option>
+          </select>
+        </div>
+        <div>
+        <button class="btn btn-info fw-bold shadow-sm me-2" onclick="openPrintTimelineModal()">
+          <i class="fa-solid fa-file-pdf"></i> IN TIMELINE
+        </button>
+        <button class="btn btn-warning fw-bold shadow-sm me-2" onclick="openPrintModal()">
+          <i class="fa-solid fa-print"></i> IN & TẢI FILE
+        </button>
+        <button class="btn btn-primary shadow-sm" onclick="openModal()">
+          <i class="fa-solid fa-plus"></i> Thêm Mới
+        </button>
+        </div>
+      </div>
+    </div>
+    <div id="breadcrumb_area" class="mb-2 ps-2" style="min-height:26px; background:#f8f9fa; border-left:3px solid #0d6efd; border-radius:2px">
+      <small id="breadcrumb" class="text-secondary" style="font-size:13px">
+        <i class="fa-solid fa-sitemap me-1"></i>Hệ thống → SKU → Timeline
+      </small>
+    </div>
+    <div id="visualization"></div>
+  </div>
+
+  <!-- PRINT AREA -->
+  <div id="printArea">
+    <!-- 1. THÔNG TIN CÔNG TY: Căn trái, font 10, in thường -->
+    <div style="margin-bottom:15px;text-align:left">
+      <div style="font-weight:normal;font-size:10px;margin-bottom:3px;text-transform:none">Công ty TNHH Việt Liên</div>
+      <div style="font-size:10px;font-weight:normal;line-height:1.5">
+        Phòng 06, Tầng 19, Tòa nhà Golden King, Số 15 Nguyễn Lương Bằng, P.Tân Mỹ, Q.7, TP.HCM<br>
+        ĐT: 028.54136608   FAX: 028.5413.6607<br>
+        Email: donhang@vietlien.vn
+      </div>
+    </div>
+
+    <!-- TIÊU ĐỀ: Căn giữa, in hoa, Bold, size 18 -->
+    <div class="text-center" style="margin:15px 0">
+      <h2 style="font-size:18px;font-weight:bold;text-transform:uppercase;margin:10px 0;letter-spacing:0.5px">CHƯƠNG TRÌNH KHUYẾN MÃI</h2>
+    </div>
+
+    <!-- MÃ CTKM VÀ THỜI GIAN: Căn giữa, size 11, in nghiêng -->
+    <div class="text-center" style="font-size:11px;font-style:italic;margin-bottom:8px">
+      Hệ thống: <strong id="p_system"></strong> - Mã: <strong id="p_code"></strong>
+    </div>
+
+    <div class="text-center" style="font-size:11px;font-style:italic;color:#d32f2f;margin-bottom:5px">
+      Thời gian khuyến mãi từ: <span id="p_dateRange"></span>
+    </div>
+
+    <div class="text-center" style="font-size:11px;font-style:italic;margin-bottom:10px">
+      Thời gian Giao Hàng: <span id="p_delRange"></span>
+    </div>
+
+    <table class="print-table" id="printTableObj">
+      <thead>
+        <tr>
+          <th rowspan="2">STT</th>
+          <th rowspan="2">MÃ VẠCH</th>
+          <th rowspan="2">TÊN SẢN PHẨM</th>
+          <th rowspan="2">GIÁ</th>
+          <th colspan="2">CTKM NTD</th>
+          <th rowspan="2">GIÁ KM</th>
+          <th rowspan="2">SLĐK</th>
+          <th rowspan="2">THÀNH TIỀN</th>
+          <th rowspan="2">GHI CHÚ</th>
+        </tr>
+        <tr>
+          <th>HÌNH THỨC</th>
+          <th>TẶNG KÈM</th>
+        </tr>
+      </thead>
+      <tbody id="p_tbody"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="7" class="text-end fw-bold">TỔNG CỘNG (TOTAL)</td>
+          <td id="p_total_qty" class="text-end fw-bold">0</td>
+          <td id="p_total_amount" class="text-end fw-bold">0</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <div class="text-end" style="margin-top:30px;margin-bottom:20px;font-style:italic;font-size:11px">
+      TP.HCM, Ngày <span id="p_day"></span> tháng <span id="p_month"></span> năm <span id="p_year"></span>
+    </div>
+
+    <div class="signature-section">
+      <div class="signature-box">
+        <span class="signature-label">NGƯỜI ĐỀ NGHỊ</span>
+        <div class="signature-name" id="p_proposer_name"></div>
+      </div>
+      <div class="signature-box">
+        <span class="signature-label">KẾ TOÁN</span>
+        <div class="signature-name">CHUNG THANH HUỆ</div>
+      </div>
+      <div class="signature-box">
+        <span class="signature-label">GIÁM ĐỐC</span>
+        <div class="signature-name">NGUYỄN THỊ THU HẰNG</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINT MODAL -->
+  <div class="modal fade" id="printModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title fw-bold">In & Tải File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label class="fw-bold">1. Hệ Thống</label>
+              <select class="form-select" id="print_system" onchange="loadPrintCtkmList()">
+                <option value="">-- Chọn --</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="fw-bold">2. Nhãn (Brand)</label>
+              <select class="form-select" id="print_brand" onchange="loadPrintCtkmList()">
+                <option value="">-- Tất cả --</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="fw-bold">3. Mã CTKM</label>
+              <select class="form-select" id="print_ctkm" onchange="renderSkuInputTable()" disabled>
+                <option value="">-- Chọn --</option>
+              </select>
+              <small class="text-muted" id="print_timeline_info"></small>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="fw-bold">4. Người đề nghị</label>
+              <input type="text" class="form-control" id="print_proposer" placeholder="VD: LÊ NAM PHƯƠNG">
+            </div>
+          </div>
+
+          <div id="sku_input_area" class="mb-3" style="display:none; background:#f8f9fa; padding:10px">
+            <label class="fw-bold text-primary">4. Chi tiết:</label>
+            <div style="max-height:300px; overflow-y:auto">
+              <table class="table table-sm table-bordered bg-white mb-0 align-middle">
+                <thead class="table-light sticky-top">
+                  <tr>
+                    <th>SKU</th>
+                    <th>CTKM</th>
+                    <th>SLĐK</th>
+                    <th>Tặng Kèm</th>
+                  </tr>
+                </thead>
+                <tbody id="sku_input_tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-info text-white fw-bold me-auto" onclick="viewReport()">DOANH SỐ</button>
+          <button class="btn btn-success fw-bold" onclick="exportToExcel()">TẢI EXCEL</button>
+          <button class="btn btn-warning fw-bold" onclick="executePrint()">IN PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT MODAL -->
+  <div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title fw-bold">Hiệu Quả CTKM</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <div id="report-loading" class="spinner-border text-info"></div>
+          <div id="report-content" style="display:none">
+            <h5 id="rpt_name" class="text-primary fw-bold"></h5>
+            <p id="rpt_time" class="mb-3"></p>
+            <div class="row">
+              <div class="col-6">
+                <div class="card border-success">
+                  <div class="card-body">
+                    <h3 id="rpt_qty" class="text-success fw-bold"></h3>
+                    <small>Số lượng</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="card border-warning">
+                  <div class="card-body">
+                    <h6 id="rpt_rev" class="text-warning fw-bold"></h6>
+                    <small>Doanh thu</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 mt-3">
+              <div style="max-height:300px;overflow-y:auto">
+                <table class="table table-sm table-striped text-start" style="font-size:12px">
+                  <thead>
+                    <tr>
+                      <th>SKU</th>
+                      <th class="text-end">SL</th>
+                      <th class="text-end">Tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rpt_details"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA MODAL -->
+  <div class="modal fade" id="dataModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modalTitle">Thêm Mới</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="promoForm">
+            <input type="hidden" id="editMode" value="create">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="fw-bold">Tên CTKM</label>
+                <input type="text" class="form-control" id="name" required>
+                <small class="text-muted" id="timeline_info"></small>
+              </div>
+              <div class="col-md-3">
+                <label>Tháng</label>
+                <input type="number" class="form-control" id="month" value="11" onchange="onMonthYearChange()">
+              </div>
+              <div class="col-md-3">
+                <label>Năm</label>
+                <input type="number" class="form-control" id="year" value="2025" onchange="onMonthYearChange()">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label class="fw-bold">CTKM có sẵn trong tháng</label>
+                <select class="form-select" id="existing_ctkm" onchange="onSelectExistingCtkm()">
+                  <option value="">-- Chọn CTKM có trong Timeline hoặc để trống để tạo mới --</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="card bg-light mb-3">
+              <div class="card-body">
+                <h6 class="text-primary fw-bold mb-3">Chọn Hàng Hóa</h6>
+                <div class="row mb-2">
+                  <div class="col-md-4">
+                    <label>Hệ Thống</label>
+                    <select class="form-select" id="system" onchange="onSystemChange_Add()"></select>
+                  </div>
+                  <div class="col-md-4">
+                    <label>Brand</label>
+                    <select class="form-select" id="brand" onchange="onBrandChange_Add()" disabled></select>
+                  </div>
+                </div>
+
+                <div id="add_sku_area" style="display:none; max-height:300px; overflow-y:auto">
+                  <table class="table table-bordered table-hover bg-white align-middle">
+                    <thead class="table-light sticky-top">
+                      <tr>
+                        <th style="width:40px" class="text-center">
+                          <input type="checkbox" onclick="toggleAllSku(this)">
+                        </th>
+                        <th>Mã SKU</th>
+                        <th>Giá Gốc</th>
+                        <th style="width:150px">Mức Giảm</th>
+                        <th style="width:200px">Tặng Kèm</th>
+                      </tr>
+                    </thead>
+                    <tbody id="add_sku_tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="fw-bold">Thời gian</label>
+                <input type="text" class="form-control" id="date_range">
+              </div>
+              <div class="col-md-6">
+                <label class="fw-bold">Giao hàng trước</label>
+                <select class="form-select" id="delivery_offset">
+                  <option value="0">0 ngày</option>
+                  <option value="7">7 ngày</option>
+                  <option value="14">14 ngày</option>
+                  <option value="21">21 ngày</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label>Ghi chú</label>
+              <input class="form-control" id="note">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-success fw-bold" onclick="saveBatchData()">LƯU TẤT CẢ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAG DROP MODAL -->
+  <div class="modal fade" id="dragDropModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title fw-bold">Chọn CTKM Mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="fw-bold">CTKM cũ:</label>
+            <div class="text-muted" id="dd_old_ctkm"></div>
+          </div>
+          <div class="mb-3">
+            <label class="fw-bold">Thời gian mới:</label>
+            <div class="text-primary" id="dd_new_dates"></div>
+          </div>
+          <div class="mb-3">
+            <label class="fw-bold">Tên CTKM mới:</label>
+            <input type="text" class="form-control" id="dd_new_ctkm" placeholder="Nhập tên CTKM mới hoặc chọn từ danh sách">
+          </div>
+          <div class="mb-3">
+            <label class="fw-bold">CTKM có sẵn trong tháng:</label>
+            <select class="form-select" id="dd_existing_ctkm" onchange="onSelectDragDropCtkm()">
+              <option value="">-- Chọn CTKM có sẵn hoặc nhập tên mới --</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="fw-bold">Giao hàng trước:</label>
+            <select class="form-select" id="dd_delivery_offset">
+              <option value="0">0 ngày</option>
+              <option value="7">7 ngày</option>
+              <option value="14">14 ngày</option>
+              <option value="21">21 ngày</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary fw-bold" onclick="confirmDragDrop()">CẬP NHẬT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINT TIMELINE MODAL -->
+  <div class="modal fade" id="printTimelineModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title fw-bold">In Timeline - 4 Tháng Gần Nhất</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="fw-bold">Hiển thị theo:</label>
+            <div class="btn-group" role="group">
+              <input type="radio" class="btn-check" name="timeline_view" id="timeline_view_system" value="system" checked onchange="updateTimelinePreview()">
+              <label class="btn btn-outline-secondary" for="timeline_view_system">
+                <i class="fa-solid fa-layer-group me-1"></i>Hệ thống → SKU
+              </label>
+              
+              <input type="radio" class="btn-check" name="timeline_view" id="timeline_view_sku" value="sku" onchange="updateTimelinePreview()">
+              <label class="btn btn-outline-secondary" for="timeline_view_sku">
+                <i class="fa-solid fa-tag me-1"></i>SKU → Hệ thống
+              </label>
+            </div>
+          </div>
+          <div class="row mb-3 g-2">
+            <div class="col-6">
+              <label class="fw-bold">Lọc Hệ thống</label>
+              <select id="print_tl_system_select" class="form-select form-select-sm" onchange="onPrintTlSystemChange()">
+                <option value="">-- Tất cả hệ thống --</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="fw-bold">Lọc Nhãn (Brand)</label>
+              <select id="print_tl_brand_select" class="form-select form-select-sm" onchange="onPrintTlBrandChange()">
+                <option value="">-- Tất cả nhãn --</option>
+              </select>
+            </div>
+          </div>
+          <div id="timeline_preview_area" style="max-height:400px; overflow-y:auto; border:1px solid #ddd; padding:15px; border-radius:4px; background:#f9f9f9">
+            <div class="text-center text-muted">
+              <i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-info text-white fw-bold" onclick="executeTimelinePrint()">
+            <i class="fa-solid fa-file-pdf me-1"></i>IN PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"></script>
+
+  <script>
+    // CONFIG API
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyvjEkiBE3lluAHk6_AOcm0vi6bTr45d7In4FWobH9WYcbOG0qz4D1sw99IaM56frvqIQ/exec';
+
+    let masterData = {},
+      currentList = [],
+      flatpickrInstance,
+      timeline;
+
+    // view mode: 'system' -> Hệ thống → SKU → Timeline (default)
+    // or 'sku' -> SKU → Hệ thống → Timeline
+    let viewMode = 'system';
+
+    const modalData   = new bootstrap.Modal(document.getElementById('dataModal'));
+    const modalPrint  = new bootstrap.Modal(document.getElementById('printModal'));
+    const modalReport = new bootstrap.Modal(document.getElementById('reportModal'));
+    const modalTimelinePrint = new bootstrap.Modal(document.getElementById('printTimelineModal'));
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      flatpickrInstance = flatpickr("#date_range", {
+        mode: "range",
+        dateFormat: "d/m/Y",
+        locale: "vn"
+      });
+
+      await fetchMasterData();
+      await fetchList();
+
+      const d = new Date();
+      document.getElementById('p_day').innerText   = String(d.getDate()).padStart(2,'0');
+      document.getElementById('p_month').innerText = String(d.getMonth()+1).padStart(2,'0');
+      document.getElementById('p_year').innerText  = d.getFullYear();
+
+      // initialize view mode label and breadcrumb
+      try {
+        const lbl = document.getElementById('view_mode_label');
+        const sel = document.getElementById('view_mode_select');
+        if (sel) sel.value = viewMode;
+        if (lbl) lbl.innerText = viewMode === 'sku' ? 'Nhãn → SKU → Hệ thống' : 'Hệ thống → SKU → Timeline';
+        setBreadcrumb(viewMode);
+      } catch (e) {}
+    });
+
+    function onViewModeChange() {
+      const sel = document.getElementById('view_mode_select');
+      if (!sel) return;
+      viewMode = sel.value || 'system';
+      // Update small label/breadcrumb
+      const lbl = document.getElementById('view_mode_label');
+      if (lbl) lbl.innerText = viewMode === 'sku' ? 'Nhãn → SKU → Hệ thống' : 'Hệ thống → SKU → Timeline';
+      // Update breadcrumb and re-render timeline with new view mode
+      setBreadcrumb(viewMode);
+      initTimeline(getFilteredList(), viewMode);
+    }
+
+    // --- 1. TÌM KIẾM GIÁ (SMART) ---
+    function findPrice(sys, brand, sku) {
+      const s = clean(sys), b = clean(brand), k = clean(sku);
+
+      // 1. Tìm hệ thống: ưu tiên match chính xác, sau đó mới cho phép bao hàm
+      let sysKey = Object.keys(masterData).find(x => clean(x) === s);
+      if (!sysKey) {
+        sysKey = Object.keys(masterData).find(x => {
+          const cx = clean(x);
+          return cx.includes(s) || s.includes(cx);
+        });
+      }
+      if (!sysKey) return 0;
+
+      const brandData = masterData[sysKey];
+
+      // 2. Tương tự cho brand
+      let brandKey = Object.keys(brandData).find(x => clean(x) === b);
+      if (!brandKey) {
+        brandKey = Object.keys(brandData).find(x => {
+          const cx = clean(x);
+          return cx.includes(b) || b.includes(cx);
+        });
+      }
+      if (!brandKey) return 0;
+
+      // 3. Tìm SKU: ưu tiên bằng nhau tuyệt đối, sau đó mới cho phép bao hàm
+      let item = brandData[brandKey].find(i => clean(i.sku) === k);
+      if (!item) {
+        item = brandData[brandKey].find(i => {
+          const cs = clean(i.sku);
+          return cs.includes(k) || k.includes(cs);
+        });
+      }
+      return item ? item : 0;
+    }
+
+    function clean(str) {
+      return String(str || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+
+    // --- 2. INIT TIMELINE ---
+    function initTimeline(data, mode) {
+      mode = mode || viewMode || 'system';
+      const container = document.getElementById('visualization');
+      container.innerHTML = '';
+
+      const groups = new vis.DataSet();
+      const items  = new vis.DataSet();
+      const processed = {
+        brands:  new Set(),
+        systems: new Set(),
+        skus:    new Set()
+      };
+
+      data.sort((a, b) =>
+        a.brand.localeCompare(b.brand) || a.system.localeCompare(b.system)
+      );
+
+      data.forEach((item, idx) => {
+        if (!item.start_date) return;
+
+        // Two rendering modes:
+        // - 'system': Brand -> System -> SKU (existing behavior)
+        // - 'sku': SKU -> System (under SKU)
+        if (mode === 'system') {
+          const bId = `b_${slug(item.brand)}`;
+          const sId = `${bId}_s_${slug(item.system)}`;
+          const kId = `${sId}_k_${slug(item.sku)}`;
+
+          if (!processed.brands.has(bId)) {
+            groups.add({ id: bId, content: item.brand, className: 'vis-group-level-brand', nestedGroups: [] });
+            processed.brands.add(bId);
+          }
+
+          if (!processed.systems.has(sId)) {
+            groups.add({ id: sId, content: item.system, className: 'vis-group-level-system', nestedGroups: [] });
+            const g = groups.get(bId);
+            if (g && g.nestedGroups) g.nestedGroups.push(sId);
+            processed.systems.add(sId);
+          }
+
+          if (!processed.skus.has(kId)) {
+            groups.add({ id: kId, content: item.sku, className: 'vis-group-level-sku' });
+            const g2 = groups.get(sId);
+            if (g2 && g2.nestedGroups) g2.nestedGroups.push(kId);
+            processed.skus.add(kId);
+          }
+
+          item._groupId = `${sId}_k_${slug(item.sku)}`; // group id used for item
+        } else if (mode === 'sku') {
+          // Top level: SKU groups
+          const kTop = `k_${slug(item.sku)}`;
+          const sUnder = `${kTop}_s_${slug(item.system)}`;
+
+          if (!processed.skus.has(kTop)) {
+            groups.add({ id: kTop, content: item.sku, className: 'vis-group-level-sku', nestedGroups: [] });
+            processed.skus.add(kTop);
+          }
+
+          if (!processed.systems.has(sUnder)) {
+            groups.add({ id: sUnder, content: item.system, className: 'vis-group-level-system' });
+            const g = groups.get(kTop);
+            if (g && g.nestedGroups) g.nestedGroups.push(sUnder);
+            processed.systems.add(sUnder);
+          }
+
+          item._groupId = sUnder;
+        }
+
+        let start = new Date(item.start_date);
+        let end   = new Date(item.end_date);
+        end.setHours(23, 59, 59, 999);
+
+        const prod = findPrice(item.system, item.brand, item.sku);
+        let priceRaw = prod.price || 0;
+        let final = priceRaw;
+        let hasDis = false;
+
+        if (String(item.promotion).includes('%') && priceRaw > 0) {
+          const m = String(item.promotion).match(/(\d+)%/);
+          if (m) {
+            final = priceRaw * (1 - parseInt(m[1], 10) / 100);
+            hasDis = true;
+          }
+        }
+
+        const priceHtml = priceRaw > 0
+          ? (hasDis
+              ? `<div class="item-price"><span class="price-original">${fmt(priceRaw)}</span> ➝ ${fmt(final)}</div>`
+              : `<div class="item-price">${fmt(priceRaw)}</div>`
+            )
+          : '';
+
+        const contentHtml = `
+          <div class="item-content">
+            <div class="item-sys">${item.system}</div>
+            <div class="item-sku">${item.sku}</div>
+            <div class="item-promo">${item.promotion}</div>
+            ${priceHtml}
+          </div>
+        `;
+
+        const tooltip =
+          `📌 ${item.name}\nSKU: ${item.sku}\nNgày: ${formatDate(start)} - ${formatDate(end)}\nKM: ${item.promotion}`;
+
+        // Choose the group id that was computed above depending on mode
+        const groupId = item._groupId || (`${slug(item.brand)}_${slug(item.system)}_${slug(item.sku)}`);
+
+        items.add({
+          id: idx,
+          group: groupId,
+          content: contentHtml,
+          start: start,
+          end: end,
+          type: 'range',
+          title: tooltip,
+          dataItem: { ...item, realStart: start, realEnd: end }
+        });
+      });
+
+      const options = {
+        orientation: 'top',
+        stack: true,
+        zoomKey: 'ctrlKey',
+        height: '100%',
+        verticalScroll: true,
+        start: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
+        end:   new Date(new Date().getFullYear(), new Date().getMonth() + 2, 1),
+        margin: {
+          item: { horizontal: 0, vertical: 5 }
+        },
+        snap: null,
+        // Tắt kéo thả để tránh thao tác sai vị trí
+        editable: {
+          updateTime: false,
+          updateGroup: false,
+          add: false,
+          remove: false
+        },
+        selectable: true
+      };
+
+      timeline = new vis.Timeline(container, items, groups, options);
+
+      timeline.on('select', p => {
+        try {
+          timeline.removeCustomTime('t_start');
+          timeline.removeCustomTime('t_end');
+          items.remove('highlight_bg');
+        } catch (e) {}
+
+        if (p.items.length) {
+          const id = p.items[0];
+          if (id === 'highlight_bg') return;
+
+          const d = items.get(id).dataItem;
+          const fmtS = dt =>
+            `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
+
+          timeline.addCustomTime(d.realStart, 't_start');
+          updateMarkerText('t_start', fmtS(d.realStart));
+
+          timeline.addCustomTime(d.realEnd, 't_end');
+          updateMarkerText('t_end', fmtS(d.realEnd));
+
+          items.add({
+            id: 'highlight_bg',
+            start: d.realStart,
+            end: d.realEnd,
+            type: 'background',
+            className: 'range-highlight'
+          });
+          
+          // Update breadcrumb with selected item details
+          setBreadcrumb(mode, d);
+        }
+      });
+
+      timeline.on('doubleClick', p => {
+        if (p.items.length && p.items[0] !== 'highlight_bg') {
+          editItem(items.get(p.items[0]).dataItem);
+        }
+      });
+
+      // update breadcrumb for this rendering (no item selected initially)
+      setBreadcrumb(mode, null);
+
+      // KÉO THẢ CTKM (đã tắt): không đăng ký moveStart/moveEnd để tránh thao tác sai vị trí
+    }
+
+    function updateMarkerText(id, t) {
+      setTimeout(() => {
+        const b = document.querySelector(`.vis-custom-time[data-custom-time-id="${id}"]`);
+        if (b) {
+          const old = b.querySelector('.custom-date-label');
+          if (old) old.remove();
+          const l = document.createElement('div');
+          l.className = 'custom-date-label';
+          l.innerText = t;
+          b.appendChild(l);
+        }
+      }, 50);
+    }
+
+    // --- MAP INPUT FROM PRINT MODAL ---
+    function getInputMap() {
+      const m = {};
+      document.querySelectorAll('#sku_input_tbody tr').forEach((r, i) => {
+        const q = r.querySelector('.qty-input');
+        const g = r.querySelector('.gift-input');
+        m[i] = {
+          qty:  parseInt(q.value, 10) || 0,
+          gift: g.value || ''
+        };
+      });
+      return m;
+    }
+
+    function getPrintData(n, m, system, brand) {
+      const cs = clean(system);
+      const cb = brand ? clean(brand) : '';
+
+      // So khớp tên CTKM theo dạng đã trim để tránh lỗi khoảng trắng
+      const i = currentList.filter(x => {
+        const sys = clean(x.system);
+        const br = clean(x.brand);
+        const matchSys = sys === cs || sys.includes(cs) || cs.includes(sys);
+        const matchBrand = !cb || br === cb || br.includes(cb) || cb.includes(br);
+        return String(x.name).trim() === String(n).trim() && matchSys && matchBrand;
+      });
+      
+      if (!i.length) return { items: [] };
+
+      const f = i[0];
+
+      const p = i.map((x, idx) => {
+        const prod = findPrice(x.system, x.brand, x.sku);
+        let pr  = prod.price || 0;
+        let bc  = prod.barcode || "";
+        let nm  = prod.name || x.sku;
+
+        let fin = pr;
+        if (String(x.promotion).includes('%')) {
+          const mat = String(x.promotion).match(/(\d+)%/);
+          if (mat) fin = pr * (1 - parseInt(mat[1], 10) / 100);
+        }
+
+        const q = m[idx] ? m[idx].qty : 0;
+        const g = (m[idx] ? m[idx].gift : '') || x.gift;
+        const a = fin * q;
+
+        return {
+          barcode: bc,
+          name: nm,
+          priceVal: pr,
+          price: fmt(pr),
+          promo: x.promotion,
+          gift: g,
+          finalPriceVal: fin,
+          priceKM: fmt(fin),
+          qtyVal: q,
+          qty: fmt(q),
+          amountVal: a,
+          amount: fmt(a),
+          note: x.note || ''
+        };
+      });
+
+      return {
+        items: p,
+        first: f,
+        dateRange: `${formatDate(f.start_date)} đến ${formatDate(f.end_date)}`,
+        // Không dùng "..." để tránh nhìn như lỗi, để trống nếu không có
+        delRange: f.delivery_str || ""
+      };
+    }
+
+    /**
+     * Apply formatting cho Excel worksheet
+     * Áp dụng các quy định về layout, typography và spacing
+     */
+    /**
+     * Apply formatting cho Excel worksheet - Professional Print-Ready
+     * Áp dụng các quy định về layout, typography và spacing
+     */
+    function applyFormatting(ws, range, headerRow, dataStartRow, totalRow, dateRow, sigHeaderRow, sigNameRow, items) {
+      // Border: Màu xám đậm #666666 (thay vì đen tuyền)
+      const border = {
+        top:   { style:'thin', color: { rgb: '666666' } },
+        bottom:{ style:'thin', color: { rgb: '666666' } },
+        left:  { style:'thin', color: { rgb: '666666' } },
+        right: { style:'thin', color: { rgb: '666666' } }
+      };
+
+      for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+          const cell_ref = XLSX.utils.encode_cell({r:R, c:C});
+          if (!ws[cell_ref]) continue;
+
+          // 1. HEADER: Thông tin công ty (Row 0-3) - Cột A, size 10, chữ thường
+          if (R < 4 && C === 0) {
+            ws[cell_ref].s = {
+              font: { sz: 10, bold: false },
+              alignment: { horizontal: "left", vertical: "top" }
+            };
+          }
+          
+          // 2. TIÊU ĐỀ: Row 5, Merge A-L, Font 18, Bold, Căn giữa
+          if (R === 5 && C === 3) {
+            ws[cell_ref].s = {
+              font: { bold: true, sz: 18 },
+              alignment: { horizontal: "center", vertical: "center" }
+            };
+          }
+          
+          // 3. Mã chương trình và thời gian: Row 7-9, Cột D, size 11, italic
+          if (R >= 7 && R <= 9 && C === 3) {
+            ws[cell_ref].s = {
+              font: { sz: 11, italic: true },
+              alignment: { horizontal: R === 7 ? "left" : "right", vertical: "center" }
+            };
+          }
+
+          // 4. BẢNG DỮ LIỆU
+          if (R >= headerRow && R <= totalRow + 1) {
+            ws[cell_ref].s = {
+              border: border,
+              font: { sz: 11 },
+              alignment: { vertical: "middle", wrapText: true }
+            };
+            
+            // Header row: Background #f8f9fa, chữ in hoa, Bold, Căn giữa
+            if (R === headerRow) {
+              ws[cell_ref].s.fill = { fgColor: { rgb: "F8F9FA" } };
+              ws[cell_ref].s.font = { bold: true, sz: 11 };
+              ws[cell_ref].s.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+            }
+            
+            // Data rows: Căn lề theo yêu cầu
+            if (R > headerRow && R <= totalRow) {
+              // STT (C=0), Mã vạch (C=1), SLĐK (C=7), Đơn giá (C=3): Căn giữa
+              if (C === 0 || C === 1 || C === 7 || C === 3) {
+                ws[cell_ref].s.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+                // Format số cho Đơn giá
+                if (C === 3) {
+                  ws[cell_ref].z = '#,##0';
+                }
+              }
+              // Tên sản phẩm (C=2): Căn trái, wrap text, width 350px
+              else if (C === 2) {
+                ws[cell_ref].s.alignment = { horizontal: "left", vertical: "middle", wrapText: true, indent: 1 };
+              }
+              // Giá KM (C=6), Thành tiền (C=8): Căn phải, format #,##0
+              else if (C === 6 || C === 8) {
+                ws[cell_ref].s.alignment = { horizontal: "right", vertical: "middle", wrapText: true };
+                ws[cell_ref].z = '#,##0';
+              }
+              // Các cột khác
+              else {
+                ws[cell_ref].s.alignment = { horizontal: C === 4 ? "center" : "left", vertical: "middle", wrapText: true };
+              }
+            }
+            
+            // Tổng cộng: "TỔNG CỘNG :" ở G, số liệu ở H và I
+            if (R === totalRow + 1) {
+              ws[cell_ref].s.font = { bold: true, sz: 11 };
+              if (C === 6) {
+                ws[cell_ref].s.alignment = { horizontal: "right", vertical: "middle" };
+              } else if (C === 7 || C === 8) {
+                ws[cell_ref].s.alignment = { horizontal: "right", vertical: "middle" };
+                ws[cell_ref].z = '#,##0';
+              }
+            }
+          }
+
+          // 5. Ngày tháng: merge H:I
+          if (R === dateRow && C >= 7 && C <= 8) {
+            ws[cell_ref].s = {
+              font: { italic: true, sz: 11 },
+              alignment: { horizontal: "right", vertical: "middle" }
+            };
+          }
+          
+          // 6. CHỮ KÝ: Header - Cột B (index 1), Cột F (index 5), Cột I (index 8)
+          if (R === sigHeaderRow) {
+            if (C === 1 || C === 5 || C === 8) {
+              ws[cell_ref].s = {
+                font: { bold: true, sz: 12 },
+                alignment: { horizontal: "center", vertical: "middle", wrapText: true }
+              };
+            }
+          }
+          
+          // Chữ ký - Tên: Cột B, Cột F, Cột I (cách chức danh 5 dòng = 100px)
+          if (R === sigNameRow) {
+            if (C === 1 || C === 5 || C === 8) {
+              ws[cell_ref].s = {
+                font: { bold: true, sz: 12 },
+                alignment: { horizontal: "center", vertical: "middle", wrapText: true }
+              };
+            }
+          }
+        }
+      }
+    }
+
+    /**
+     * Setup column widths theo yêu cầu
+     * STT (40px), Mã vạch (120px), Tên SP (350px - setColumnWidth(3, 350)), Giá/Thành tiền (100px)
+     */
+    function setupColumnWidths() {
+      return [
+        { wch: 5 },   // STT (40px ≈ 5 chars)
+        { wch: 15 },  // MÃ VẠCH (120px ≈ 15 chars)
+        { wch: 44 },  // TÊN SẢN PHẨM (350px ≈ 44 chars) - setColumnWidth(3, 350)
+        { wch: 12 },  // GIÁ (-VAT) / Đơn giá (100px ≈ 12 chars) - Căn giữa
+        { wch: 15 },  // HÌNH THỨC
+        { wch: 15 },  // TẶNG KÈM
+        { wch: 12 },  // GIÁ KM (-VAT) (100px ≈ 12 chars)
+        { wch: 8 },   // SLĐK
+        { wch: 12 },  // THÀNH TIỀN (100px ≈ 12 chars)
+        { wch: 15 }   // GHI CHÚ
+      ];
+    }
+
+    function exportToExcel() {
+      const n = document.getElementById('print_ctkm').value;
+      if (!n) return alert("Chưa chọn CTKM!");
+
+      try {
+        if (typeof XLSX === 'undefined') return alert("Chờ thư viện...");
+
+        const p = getPrintData(n, getInputMap());
+        if (!p.items.length) return alert("Không có dữ liệu!");
+
+        // 1. HEADER: Thông tin công ty căn trái, font 10, in thường (cột A)
+        const d = [
+          ["Công ty TNHH Việt Liên", "", "", "", "", "", "", "", "", ""],
+          ["Phòng 06, Tầng 19, Tòa nhà Golden King, Số 15 Nguyễn Lương Bằng, P.Tân Mỹ, Q.7, TP.HCM", "", "", "", "", "", "", "", "", ""],
+          ["ĐT: 028.54136608   FAX: 028.5413.6607", "", "", "", "", "", "", "", "", ""],
+          ["Email: donhang@vietlien.vn", "", "", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", "", "", ""],
+          // Tiêu đề: căn giữa, in hoa, Bold, size 18 (merge A6:J6)
+          ["CHƯƠNG TRÌNH KHUYẾN MÃI", "", "", "", "", "", "", "", "", ""],
+          ["", "", "", "", "", "", "", "", "", ""],
+          // Mã CTKM và thời gian: căn giữa, size 11, in nghiêng (merge A8:J8, A9:J9, A10:J10)
+          [`Hệ thống: ${p.first.system} - Mã: ${n}`, "", "", "", "", "", "", "", "", ""],
+          [`Thời gian khuyến mãi từ: ${p.dateRange}`, "", "", "", "", "", "", "", "", ""],
+          [`Thời gian Giao Hàng: ${p.delRange}`, "", "", "", "", "", "", "", "", ""],
+          // Cách 1 hàng trống sau hàng 10
+          ["", "", "", "", "", "", "", "", "", ""],
+          // Header bảng: background #f8f9fa, chữ in hoa, Bold (A12:K12)
+          ["STT","MÃ VẠCH","TÊN SẢN PHẨM","GIÁ (-VAT)","HÌNH THỨC","TẶNG KÈM","GIÁ KM (-VAT)","SLĐK","THÀNH TIỀN","GHI CHÚ"]
+        ];
+
+        let tQ = 0, tA = 0;
+
+        p.items.forEach((i, x) => {
+          tQ += i.qtyVal;
+          tA += i.amountVal;
+          d.push([
+            x + 1,
+            i.barcode,
+            i.name,
+            i.priceVal,
+            i.promo,
+            i.gift,
+            i.finalPriceVal,
+            i.qtyVal,
+            i.amountVal,
+            i.note
+          ]);
+        });
+
+        // Tổng cộng: "TỔNG CỘNG (TOTAL):" merge 7 cột (A-G), số liệu ở H và I - giống PDF
+        d.push(["","","","","","","TỔNG CỘNG (TOTAL):",tQ,tA,""]);
+        d.push([]);
+        d.push([]);
+        
+        // Ngày tháng: merge H:J, căn giữa, phía trên dòng GIÁM ĐỐC
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+        d.push(["","","","","","","","",`TP.HCM, Ngày ${day} tháng ${month} năm ${year}`,""]);
+        d.push([]);
+        
+        // Chữ ký - Header: NGƯỜI ĐỀ NGHỊ (A:C), KẾ TOÁN (E:G), GIÁM ĐỐC (H:J)
+        d.push(["NGƯỜI ĐỀ NGHỊ","","","","KẾ TOÁN","","","GIÁM ĐỐC","",""]);
+        d.push([]);
+        d.push([]);
+        d.push([]);
+        d.push([]);
+        d.push([]);
+        d.push([]);
+        
+        // Chữ ký - Tên: Tên người đề nghị (A:C), CHUNG THANH HUỆ (E:G), NGUYỄN THỊ THU HẰNG (H:J)
+        const proposerName = document.getElementById('print_proposer').value.toUpperCase() || '';
+        d.push([
+          proposerName,
+          "","",
+          "","",
+          "CHUNG THANH HUỆ",
+          "",
+          "NGUYỄN THỊ THU HẰNG",
+          "",""
+        ]);
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(d);
+
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        // Border: Màu xám đậm #666666 (thay vì đen tuyền)
+        const border = {
+          top:   { style:'thin', color: { rgb: '666666' } },
+          bottom:{ style:'thin', color: { rgb: '666666' } },
+          left:  { style:'thin', color: { rgb: '666666' } },
+          right: { style:'thin', color: { rgb: '666666' } }
+        };
+
+        // Tính toán row numbers một lần (theo layout trong ảnh)
+        const headerRow = 11; // Row 12 (0-based = 11) - Header bảng (sau 1 hàng trống sau hàng 10)
+        const dataStartRow = headerRow + 1;
+        const totalRow = dataStartRow + p.items.length;
+        const dateRow = totalRow + 3; // Ngày tháng (sau tổng cộng + 2 dòng trống)
+        const sigHeaderRow = totalRow + 6; // Chữ ký header (sau ngày tháng + 1 dòng trống)
+        const sigNameRow = totalRow + 13; // Tên chữ ký (cách header 6 dòng trống)
+        
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+          for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell_ref = XLSX.utils.encode_cell({r:R, c:C});
+            if (!ws[cell_ref]) continue;
+
+            // 1. HEADER: Thông tin công ty - merge A1:D1, A2:D2, A3:D3, căn trái, font 10, in thường
+            if (R < 3 && C >= 0 && C <= 3) {
+              ws[cell_ref].s = {
+                font: { sz: 10, bold: false },
+                alignment: { horizontal: "left", vertical: "top", wrapText: false }
+              };
+            }
+            // Row 4 (Email) cũng merge A4:D4
+            if (R === 3 && C >= 0 && C <= 3) {
+              ws[cell_ref].s = {
+                font: { sz: 10, bold: false },
+                alignment: { horizontal: "left", vertical: "top", wrapText: false }
+              };
+            }
+            
+            // Tiêu đề: căn giữa, in hoa, Bold, size 18 (row 6, merge A6:J6)
+            if (R === 5 && C === 0) {
+              ws[cell_ref].s = {
+                font: { bold: true, sz: 18 },
+                alignment: { horizontal: "center", vertical: "center" }
+              };
+            }
+            
+            // Mã CTKM và thời gian: căn giữa, size 11, in nghiêng (row 8-10, merge A:J)
+            if (R >= 7 && R <= 9 && C === 0) {
+              ws[cell_ref].s = {
+                font: { sz: 11, italic: true },
+                alignment: { horizontal: "center", vertical: "middle" }
+              };
+            }
+
+            // 2. BẢNG DỮ LIỆU
+            if (R >= headerRow && R <= totalRow + 1) {
+              ws[cell_ref].s = {
+                border: border,
+                font: { sz: 11 },
+                alignment: { vertical: "middle", wrapText: true }
+              };
+              
+              // Header bảng: background #f8f9fa, chữ in hoa, Bold, Căn giữa
+              if (R === headerRow) {
+                ws[cell_ref].s.fill = { fgColor: { rgb: "F8F9FA" } };
+                ws[cell_ref].s.font = { bold: true, sz: 11 };
+                ws[cell_ref].s.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+              }
+              
+              // Dòng dữ liệu: Căn lề theo yêu cầu
+              if (R > headerRow && R <= totalRow) {
+                // STT (C=0), Mã vạch (C=1), SLĐK (C=7): Căn giữa
+                if (C === 0 || C === 1 || C === 7) {
+                  ws[cell_ref].s.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+                }
+                // Tên sản phẩm (C=2): Căn trái, có padding
+                else if (C === 2) {
+                  ws[cell_ref].s.alignment = { horizontal: "left", vertical: "middle", wrapText: true, indent: 1 };
+                }
+                // Giá (C=3), Thành tiền (C=8): Căn phải, format số
+                else if (C === 3 || C === 8) {
+                  ws[cell_ref].s.alignment = { horizontal: "right", vertical: "middle", wrapText: true };
+                  ws[cell_ref].z = '#,##0';
+                }
+                // Giá KM (C=6): Căn phải, format số
+                else if (C === 6) {
+                  ws[cell_ref].s.alignment = { horizontal: "right", vertical: "middle", wrapText: true };
+                  ws[cell_ref].z = '#,##0';
+                }
+                // Các cột khác: căn trái hoặc center tùy nội dung
+                else {
+                  ws[cell_ref].s.alignment = { horizontal: C === 4 ? "center" : "left", vertical: "middle", wrapText: true };
+                }
+              }
+              
+              // Dòng tổng cộng: "TỔNG CỘNG (TOTAL):" merge 7 cột (A-G), số liệu ở H và I - giống PDF
+              if (R === totalRow + 1) {
+                ws[cell_ref].s.font = { bold: true, sz: 11 };
+                if (C >= 0 && C <= 6) {
+                  // Cột A-G: "TỔNG CỘNG (TOTAL):" - căn phải trong merged cell
+                  ws[cell_ref].s.alignment = { horizontal: "right", vertical: "middle" };
+                } else if (C === 7) {
+                  // Cột H: Số lượng - căn giữa (giống PDF)
+                  ws[cell_ref].s.alignment = { horizontal: "center", vertical: "middle" };
+                  ws[cell_ref].z = '#,##0';
+                } else if (C === 8) {
+                  // Cột I: Thành tiền - căn phải
+                  ws[cell_ref].s.alignment = { horizontal: "right", vertical: "middle" };
+                  ws[cell_ref].z = '#,##0';
+                }
+              }
+            }
+
+            // Ngày tháng: merge H:J (cột 7-9), căn giữa, phía trên dòng GIÁM ĐỐC
+            if (R === dateRow && C >= 7 && C <= 9) {
+              ws[cell_ref].s = {
+                font: { italic: true, sz: 11 },
+                alignment: { horizontal: "center", vertical: "middle" }
+              };
+            }
+            
+            // 3. CHỮ KÝ: Header - NGƯỜI ĐỀ NGHỊ (A:C), KẾ TOÁN (E:G), GIÁM ĐỐC (H:J)
+            if (R === sigHeaderRow) {
+              if ((C >= 0 && C <= 2) || (C >= 4 && C <= 6) || (C >= 7 && C <= 9)) {
+                ws[cell_ref].s = {
+                  font: { bold: true, sz: 12 },
+                  alignment: { horizontal: "center", vertical: "middle", wrapText: true }
+                };
+              }
+            }
+            
+            // Chữ ký - Tên: Tên người đề nghị (A:C), CHUNG THANH HUỆ (E:G), NGUYỄN THỊ THU HẰNG (H:J)
+            if (R === sigNameRow) {
+              if ((C >= 0 && C <= 2) || (C >= 4 && C <= 6) || (C >= 7 && C <= 9)) {
+                ws[cell_ref].s = {
+                  font: { bold: true, sz: 12 },
+                  alignment: { horizontal: "center", vertical: "middle", wrapText: true }
+                };
+              }
+            }
+          }
+        }
+
+        ws['!merges'] = [
+          // Header: Thông tin công ty - merge A1:D1, A2:D2, A3:D3, A4:D4, căn trái
+          { s:{r:0,c:0}, e:{r:0,c:3} }, // Row 1: Công ty TNHH Việt Liên
+          { s:{r:1,c:0}, e:{r:1,c:3} }, // Row 2: Địa chỉ
+          { s:{r:2,c:0}, e:{r:2,c:3} }, // Row 3: ĐT/FAX
+          { s:{r:3,c:0}, e:{r:3,c:3} }, // Row 4: Email
+          // Title: CHƯƠNG TRÌNH KHUYẾN MÃI (row 6, merge A6:J6)
+          { s:{r:5,c:0}, e:{r:5,c:9} },
+          // Mã CTKM và thời gian: merge A8:J8, A9:J9, A10:J10 để căn giữa
+          { s:{r:7,c:0}, e:{r:7,c:9} }, // Row 8: Hệ thống - Mã
+          { s:{r:8,c:0}, e:{r:8,c:9} }, // Row 9: Thời gian khuyến mãi
+          { s:{r:9,c:0}, e:{r:9,c:9} }, // Row 10: Thời gian Giao Hàng
+          // Tổng cộng: merge A đến F (row totalRow+1) - giống PDF (colspan 7)
+          { s:{r:totalRow + 1, c:0}, e:{r:totalRow + 1, c:6} },
+          // Ngày tháng: merge H:J (cột 7-9), căn giữa, phía trên dòng GIÁM ĐỐC
+          { s:{r:dateRow, c:7}, e:{r:dateRow, c:9} },
+          // Chữ ký - Header: NGƯỜI ĐỀ NGHỊ (A:C), KẾ TOÁN (E:G), GIÁM ĐỐC (H:J)
+          { s:{r:sigHeaderRow, c:0}, e:{r:sigHeaderRow, c:2} }, // NGƯỜI ĐỀ NGHỊ (A-C)
+          { s:{r:sigHeaderRow, c:4}, e:{r:sigHeaderRow, c:6} }, // KẾ TOÁN (E-G)
+          { s:{r:sigHeaderRow, c:7}, e:{r:sigHeaderRow, c:9} }, // GIÁM ĐỐC (H-J)
+          // Chữ ký - Tên: Tên người đề nghị (A:C), CHUNG THANH HUỆ (E:G), NGUYỄN THỊ THU HẰNG (H:J)
+          { s:{r:sigNameRow, c:0}, e:{r:sigNameRow, c:2} }, // Tên người đề nghị (A-C)
+          { s:{r:sigNameRow, c:4}, e:{r:sigNameRow, c:6} }, // CHUNG THANH HUỆ (E-G)
+          { s:{r:sigNameRow, c:7}, e:{r:sigNameRow, c:9} }  // NGUYỄN THỊ THU HẰNG (H-J)
+        ];
+
+        // Setup column widths
+        ws['!cols'] = setupColumnWidths();
+
+        // Set row heights: Dòng dữ liệu tối thiểu 25px (19pt), chữ ký
+        if (!ws['!rows']) ws['!rows'] = [];
+        
+        // Dòng dữ liệu: Tự động giãn dòng cho tên sản phẩm dài (autoResizeRows logic)
+        for (let r = dataStartRow; r <= totalRow; r++) {
+          if (!ws['!rows'][r]) ws['!rows'][r] = {};
+          // Tính toán chiều cao dòng dựa trên tên sản phẩm (cột C, index 2)
+          const cellC = XLSX.utils.encode_cell({r: r, c: 2});
+          if (ws[cellC] && ws[cellC].v) {
+            const productName = String(ws[cellC].v);
+            // Ước tính: mỗi 50 ký tự = 1 dòng thêm, tối thiểu 19pt (25px)
+            const estimatedLines = Math.max(1, Math.ceil(productName.length / 50));
+            ws['!rows'][r].hpt = Math.max(19, 19 + (estimatedLines - 1) * 15); // Tăng 15pt mỗi dòng thêm
+          } else {
+            ws['!rows'][r].hpt = 19; // 25px ≈ 19pt (mặc định)
+          }
+        }
+        
+        // Dòng tổng cộng
+        if (!ws['!rows'][totalRow + 1]) ws['!rows'][totalRow + 1] = {};
+        ws['!rows'][totalRow + 1].hpt = 20;
+        
+        // Chữ ký: Header và tên 20pt, khoảng trống 5 dòng (20px mỗi dòng = 100px)
+        if (!ws['!rows'][sigHeaderRow]) ws['!rows'][sigHeaderRow] = {};
+        ws['!rows'][sigHeaderRow].hpt = 20; // Header: 20pt
+        
+        if (!ws['!rows'][sigNameRow]) ws['!rows'][sigNameRow] = {};
+        ws['!rows'][sigNameRow].hpt = 20; // Tên: 20pt
+        
+        // Khoảng trống giữa header và tên: 5 dòng, mỗi dòng 20px (≈ 15pt)
+        for (let r = sigHeaderRow + 1; r < sigNameRow; r++) {
+          if (!ws['!rows'][r]) ws['!rows'][r] = {};
+          ws['!rows'][r].hpt = 15; // Khoảng trống: 15pt (20px mỗi dòng)
+        }
+
+        XLSX.utils.book_append_sheet(wb, ws, "CTKM");
+        XLSX.writeFile(wb, `CTKM_${n}.xlsx`);
+      } catch (e) {
+        alert('Lỗi: ' + e);
+      }
+    }
+
+    async function executePrint() {
+      const n = document.getElementById('print_ctkm').value;
+      const s = document.getElementById('print_system').value;
+      const b = document.getElementById('print_brand') ? document.getElementById('print_brand').value : '';
+      const p = document.getElementById('print_proposer').value.toUpperCase();
+      if (!n) return alert('Chọn CTKM!');
+
+      const m = getInputMap();
+      const btn = document.querySelector('#printModal .btn-warning');
+      btn.innerHTML = '...';
+      btn.disabled = true;
+
+      try {
+        const pd = getPrintData(n, m, s, b);
+        const data = {
+          system:      pd.first.system,
+          ctkmName:    n,
+          dateRange:   pd.dateRange,
+          delRange:    pd.delRange,
+          proposer:    p,
+          totalQty:    fmt(pd.items.reduce((a,b)=>a+b.qtyVal,0)),
+          totalAmount: fmt(pd.items.reduce((a,b)=>a+b.amountVal,0)),
+          items:       pd.items
+        };
+
+        const r = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action:'save_pdf', data })
+        });
+        const j = await r.json();
+
+        if (j.success) {
+          populatePrint(data);
+          modalPrint.hide();
+          setTimeout(() => {
+            const el = document.getElementById('printArea');
+            el.style.display = 'flex';
+            window.print();
+            el.style.display = 'none';
+            alert(j.data.message);
+          }, 500);
+        } else {
+          alert(j.error);
+        }
+      } catch (e) {
+        alert(e);
+      } finally {
+        btn.innerHTML = 'IN PDF';
+        btn.disabled = false;
+      }
+    }
+
+    function populatePrint(d) {
+      // Đảm bảo tất cả giá trị không bị undefined hoặc null, không hiển thị "..."
+      document.getElementById('p_proposer_name').innerText = (d.proposer || '').trim();
+      document.getElementById('p_system').innerText  = (d.system || '').trim();
+      document.getElementById('p_code').innerText    = (d.ctkmName || '').trim();
+      document.getElementById('p_dateRange').innerText = (d.dateRange || '').trim();
+      document.getElementById('p_delRange').innerText   = (d.delRange || '').trim();
+
+      // Cập nhật ngày tháng hiện tại
+      const today = new Date();
+      document.getElementById('p_day').innerText   = String(today.getDate()).padStart(2, '0');
+      document.getElementById('p_month').innerText = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('p_year').innerText  = today.getFullYear();
+
+      const t = document.getElementById('p_tbody');
+      t.innerHTML = '';
+
+      let tQ = 0, tA = 0;
+
+      d.items.forEach((i, idx) => {
+        tQ += i.qtyVal;
+        tA += i.amountVal;
+        t.innerHTML += `
+          <tr>
+            <td class="text-center">${idx+1}</td>
+            <td class="text-center fw-bold">${i.barcode || ''}</td>
+            <td>${i.name || ''}</td>
+            <td class="text-end">${i.price || '0'}</td>
+            <td class="text-center">${i.promo || ''}</td>
+            <td class="text-danger" style="font-size:10px">${i.gift || ''}</td>
+            <td class="text-end fw-bold">${i.priceKM || '0'}</td>
+            <td class="text-end fw-bold">${i.qty || '0'}</td>
+            <td class="text-end fw-bold">${i.amount || '0'}</td>
+            <td>${i.note || ''}</td>
+          </tr>`;
+      });
+
+      document.getElementById('p_total_qty').innerText    = fmt(tQ);
+      document.getElementById('p_total_amount').innerText = fmt(tA);
+    }
+
+    async function viewReport() {
+      const n = document.getElementById('print_ctkm').value;
+      if (!n) return alert('Chọn!');
+
+      modalReport.show();
+      document.getElementById('report-loading').style.display = 'block';
+      document.getElementById('report-content').style.display = 'none';
+
+      try {
+        const r = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action:'report', data:{ name:n } })
+        });
+        const j = await r.json();
+
+        if (j.success) {
+          const d = j.data;
+          document.getElementById('rpt_name').innerText = d.name;
+          document.getElementById('rpt_time').innerText = `${d.start} - ${d.end}`;
+          document.getElementById('rpt_qty').innerText  = fmt(d.qty);
+          document.getElementById('rpt_rev').innerText  = fmt(d.revenue);
+
+          const t = document.getElementById('rpt_details');
+          t.innerHTML = '';
+
+          if (d.details && d.details.length) {
+            d.details.forEach(i => {
+              t.innerHTML += `
+                <tr>
+                  <td>${i.sku}</td>
+                  <td class="text-end">${fmt(i.qty)}</td>
+                  <td class="text-end">${fmt(i.rev)}</td>
+                </tr>`;
+            });
+          } else {
+            t.innerHTML = '<tr><td colspan="3" class="text-center">0</td></tr>';
+          }
+
+          document.getElementById('report-loading').style.display = 'none';
+          document.getElementById('report-content').style.display = 'block';
+        } else {
+          alert(j.error);
+        }
+      } catch (e) {
+        alert(e);
+      }
+    }
+
+    async function fetchMasterData() {
+      try {
+        const r = await fetch(`${API_URL}?action=masterdata`);
+        const j = await r.json();
+        if (j.success) {
+          masterData = j.data;
+          renderSys();
+        }
+      } catch (e) {}
+    }
+
+    async function fetchList() {
+      try {
+        const r = await fetch(`${API_URL}?action=list`);
+        const j = await r.json();
+        if (j.success) {
+          currentList = j.data;
+          populateSystemFilter();
+          // Render timeline with current filter applied
+          initTimeline(getFilteredList(), viewMode);
+        }
+      } catch (e) {}
+    }
+
+    // System filter helpers
+    function populateSystemFilter() {
+      const sel = document.getElementById('system_filter_select');
+      if (!sel) return;
+      const systems = new Set();
+      (currentList || []).forEach(i => {
+        const s = String(i.system || '').trim();
+        if (s) systems.add(s);
+      });
+      sel.innerHTML = '<option value="">-- Tất cả hệ thống --</option>';
+      Array.from(systems).sort().forEach(s => {
+        sel.innerHTML += `<option value="${s}">${s}</option>`;
+      });
+    }
+
+    function getFilteredList() {
+      const sel = document.getElementById('system_filter_select');
+      const val = sel ? String(sel.value || '').trim() : '';
+      if (!val) return currentList || [];
+      return (currentList || []).filter(i => {
+        const sys = String(i.system || '').trim();
+        return sys === val || sys.includes(val) || val.includes(sys);
+      });
+    }
+
+    function onSystemFilterChange() {
+      const filtered = getFilteredList();
+      initTimeline(filtered, viewMode);
+      try { if (document.getElementById('printTimelineModal') && document.getElementById('timeline_preview_area')) updateTimelinePreview(); } catch(e){}
+    }
+
+    // --- Print modal helpers: populate system/brand selects and filter for printing ---
+    function populatePrintTimelineModalControls() {
+      const sysSel = document.getElementById('print_tl_system_select');
+      const brSel = document.getElementById('print_tl_brand_select');
+      if (!sysSel || !brSel) return;
+      // collect systems from currentList
+      const systems = new Set();
+      (currentList || []).forEach(i => {
+        const s = String(i.system || '').trim();
+        if (s) systems.add(s);
+      });
+      sysSel.innerHTML = '<option value="">-- Tất cả hệ thống --</option>';
+      Array.from(systems).sort().forEach(s => sysSel.innerHTML += `<option value="${s}">${s}</option>`);
+
+      // populate brands empty initially
+      brSel.innerHTML = '<option value="">-- Tất cả nhãn --</option>';
+      // if header system filter is set, preselect same
+      const headerSel = document.getElementById('system_filter_select');
+      if (headerSel && headerSel.value) {
+        sysSel.value = headerSel.value;
+        populatePrintBrandsForSystem(sysSel.value);
+      }
+    }
+
+    function populatePrintBrandsForSystem(system) {
+      const brSel = document.getElementById('print_tl_brand_select');
+      if (!brSel) return;
+      brSel.innerHTML = '<option value="">-- Tất cả nhãn --</option>';
+      const brands = new Set();
+      (currentList || []).forEach(i => {
+        const s = String(i.system || '').trim();
+        if (!system || s === system || s.includes(system) || system.includes(s)) {
+          const b = String(i.brand || '').trim();
+          if (b) brands.add(b);
+        }
+      });
+      Array.from(brands).sort().forEach(b => brSel.innerHTML += `<option value="${b}">${b}</option>`);
+    }
+
+    function onPrintTlSystemChange() {
+      const sys = document.getElementById('print_tl_system_select').value;
+      populatePrintBrandsForSystem(sys);
+      updateTimelinePreview();
+    }
+
+    function onPrintTlBrandChange() {
+      updateTimelinePreview();
+    }
+
+    function getPrintFilteredList() {
+      // priority: print modal selects; fallback to header system filter; else all
+      const sysSel = document.getElementById('print_tl_system_select');
+      const brSel = document.getElementById('print_tl_brand_select');
+      const headerSel = document.getElementById('system_filter_select');
+
+      const sysVal = sysSel ? String(sysSel.value || '').trim() : '';
+      const brVal = brSel ? String(brSel.value || '').trim() : '';
+      const headerVal = headerSel ? String(headerSel.value || '').trim() : '';
+
+      const useSys = sysVal || headerVal || '';
+
+      return (currentList || []).filter(i => {
+        const sys = String(i.system || '').trim();
+        const br = String(i.brand || '').trim();
+        if (useSys) {
+          if (!(sys === useSys || sys.includes(useSys) || useSys.includes(sys))) return false;
+        }
+        if (brVal) {
+          if (!(br === brVal || br.includes(brVal) || brVal.includes(br))) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderSys() {
+      const s = document.getElementById('system');
+      s.innerHTML = '<option value="">-- Chọn --</option>';
+      Object.keys(masterData).forEach(k => {
+        s.innerHTML += `<option value="${k}">${k}</option>`;
+      });
+    }
+
+    function openModal() {
+      document.getElementById('promoForm').reset();
+      document.getElementById('add_sku_area').style.display = 'none';
+      document.getElementById('editMode').value = 'create';
+      document.getElementById('modalTitle').innerText = 'Thêm Mới';
+      // reset thông tin timeline / CTKM có sẵn
+      document.getElementById('timeline_info').innerText = '';
+      const exSel = document.getElementById('existing_ctkm');
+      if (exSel) {
+        exSel.innerHTML = '<option value=\"\">-- Chọn CTKM có trong Timeline hoặc để trống để tạo mới --</option>';
+      }
+      // Reset copy data
+      window._copyCtkmSkusToTick = null;
+      copyCtkmData = null;
+      modalData.show();
+    }
+
+    function editItem(i) {
+      document.getElementById('modalTitle').innerText = "Sửa: " + i.name;
+      document.getElementById('editMode').value = 'update';
+
+      document.getElementById('name').value  = i.name;
+      document.getElementById('month').value = i.month;
+      document.getElementById('year').value  = i.year;
+      document.getElementById('note').value  = i.note;
+
+      if (i.start_date && i.end_date) {
+        flatpickrInstance.setDate([i.start_date, i.end_date]);
+      }
+
+      modalData.show();
+    }
+
+    function onSystemChange_Add() {
+      const s = document.getElementById('system').value;
+      const b = document.getElementById('brand');
+
+      b.innerHTML = '<option value="">-- Chọn --</option>';
+      b.disabled = !s;
+      document.getElementById('add_sku_area').style.display = 'none';
+
+      if (s && masterData[s]) {
+        Object.keys(masterData[s]).forEach(x => {
+          b.innerHTML += `<option value="${x}">${x}</option>`;
+        });
+      }
+
+      // cập nhật danh sách CTKM có sẵn theo hệ thống + tháng/năm
+      onMonthYearChange();
+    }
+
+    function onBrandChange_Add() {
+      const s = document.getElementById('system').value;
+      const b = document.getElementById('brand').value;
+      const t = document.getElementById('add_sku_tbody');
+
+      if (!s || !b) return;
+
+      const skus = masterData[s][b] || [];
+      t.innerHTML = '';
+
+      if (!skus.length) {
+        t.innerHTML = '<tr><td colspan="5" class="text-center">Trống</td></tr>';
+      } else {
+        skus.forEach((i, idx) => {
+          t.innerHTML += `
+            <tr>
+              <td class="text-center">
+                <input type="checkbox" class="sku-check" value="${i.sku}" id="chk_${idx}">
+              </td>
+              <td><b>${i.sku}</b></td>
+              <td>${fmt(i.price)}</td>
+              <td><input type="text" class="form-control form-control-sm sku-promo"></td>
+              <td><input type="text" class="form-control form-control-sm sku-gift"></td>
+            </tr>`;
+        });
+      }
+
+      document.getElementById('add_sku_area').style.display = 'block';
+
+      // Nếu đang copy CTKM, tick các SKU từ CTKM cũ
+      if (window._copyCtkmSkusToTick) {
+        setTimeout(() => tickCopyCtkmSkus(), 100);
+      }
+    }
+
+    // Tick SKU từ CTKM cũ khi copy
+    function tickCopyCtkmSkus() {
+      if (!window._copyCtkmSkusToTick || !window._copyCtkmSkusToTick.length) {
+        console.log('No SKUs to tick');
+        return;
+      }
+
+      console.log('Ticking SKUs:', window._copyCtkmSkusToTick.length);
+      let tickedCount = 0;
+      const notFoundSkus = [];
+
+      window._copyCtkmSkusToTick.forEach(skuData => {
+        const skuValue = String(skuData.sku || '').trim();
+        if (!skuValue) return;
+
+        // Tìm checkbox bằng value (SKU) - thử nhiều cách
+        let skuCheckbox = document.querySelector(`.sku-check[value="${skuValue}"]`);
+        
+        // Nếu không tìm thấy, thử tìm bằng text trong row
+        if (!skuCheckbox) {
+          const allCheckboxes = document.querySelectorAll('.sku-check');
+          allCheckboxes.forEach(cb => {
+            const row = cb.closest('tr');
+            if (row) {
+              const skuCell = row.querySelector('td:nth-child(2)'); // Cột SKU
+              if (skuCell && skuCell.textContent.trim() === skuValue) {
+                skuCheckbox = cb;
+              }
+            }
+          });
+        }
+
+        if (skuCheckbox) {
+          skuCheckbox.checked = true;
+          tickedCount++;
+          // Pre-fill promotion và gift
+          const row = skuCheckbox.closest('tr');
+          if (row) {
+            const promoInput = row.querySelector('.sku-promo');
+            const giftInput = row.querySelector('.sku-gift');
+            if (promoInput && skuData.promotion) {
+              promoInput.value = skuData.promotion;
+            }
+            if (giftInput && skuData.gift) {
+              giftInput.value = skuData.gift;
+            }
+          }
+        } else {
+          notFoundSkus.push(skuValue);
+        }
+      });
+
+      // Debug: log kết quả
+      console.log(`Đã tick ${tickedCount}/${window._copyCtkmSkusToTick.length} SKU từ CTKM cũ`);
+      if (notFoundSkus.length > 0) {
+        console.log('SKU không tìm thấy trong brand hiện tại:', notFoundSkus);
+        console.log('Có thể các SKU này thuộc brand khác. Hãy đổi brand để tick chúng.');
+      }
+    }
+
+    // --- CTKM THEO THÁNG / HỆ THỐNG (FORM THÊM MỚI) ---
+    function getMonthNumber(mStr) {
+      if (!mStr) return null;
+      const m = String(mStr).match(/\d+/);
+      return m ? parseInt(m[0], 10) : null;
+    }
+
+    function onMonthYearChange() {
+      const sys = document.getElementById('system').value;
+      const mVal = parseInt(document.getElementById('month').value, 10);
+      const yVal = parseInt(document.getElementById('year').value, 10);
+      const sel = document.getElementById('existing_ctkm');
+
+      if (!sel) return;
+
+      sel.innerHTML = '<option value=\"\">-- Chọn CTKM có trong Timeline hoặc để trống để tạo mới --</option>';
+      document.getElementById('timeline_info').innerText = '';
+
+      if (!sys || !mVal || !yVal || !currentList.length) return;
+
+      const cs = clean(sys);
+      const names = new Set();
+
+      currentList.forEach(item => {
+        if (clean(item.system) !== cs) return;
+        const im = getMonthNumber(item.month);
+        const iy = parseInt(item.year, 10);
+        if (im === mVal && iy === yVal) {
+          names.add(item.name);
+        }
+      });
+
+      [...names].sort().forEach(n => {
+        sel.innerHTML += `<option value="${n}">${n}</option>`;
+      });
+    }
+
+    function onSelectExistingCtkm() {
+      const n = document.getElementById('existing_ctkm').value;
+      const sys = document.getElementById('system').value;
+      const info = document.getElementById('timeline_info');
+
+      if (!n) {
+        info.innerText = '';
+        return;
+      }
+
+      const cs = clean(sys);
+      const match = currentList.find(
+        x => clean(x.system) === cs && String(x.name).trim() === String(n).trim()
+      );
+
+      if (match) {
+        document.getElementById('name').value = match.name;
+        if (match.start_date && match.end_date) {
+          flatpickrInstance.setDate([match.start_date, match.end_date]);
+        }
+        info.innerText = `Timeline: ${formatDate(match.start_date)} đến ${formatDate(match.end_date)}`;
+      } else {
+        info.innerText = '';
+      }
+    }
+
+    function toggleAllSku(src) {
+      document.querySelectorAll('.sku-check').forEach(c => c.checked = src.checked);
+    }
+
+    async function saveBatchData() {
+      const com = {
+        name:  document.getElementById('name').value,
+        month: document.getElementById('month').value,
+        year:  document.getElementById('year').value,
+        system:document.getElementById('system').value,
+        brand: document.getElementById('brand').value,
+        date_range: document.getElementById('date_range').value,
+        delivery_offset: document.getElementById('delivery_offset').value,
+        note:  document.getElementById('note').value
+      };
+
+      if (!com.name) return alert("Nhập tên!");
+
+      const items = [];
+      document.querySelectorAll('.sku-check:checked').forEach(c => {
+        const r = c.closest('tr');
+        items.push({
+          sku: c.value,
+          promotion: r.querySelector('.sku-promo').value,
+          gift:      r.querySelector('.sku-gift').value
+        });
+      });
+
+      if (!items.length) return alert("Chọn SP!");
+
+      const btn = document.querySelector('#dataModal .btn-success');
+      btn.innerHTML = '...';
+      btn.disabled = true;
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action:'save', data:{ common:com, items:items } })
+        });
+        alert("Đã lưu!");
+        modalData.hide();
+        // Reset copy data
+        window._copyCtkmSkusToTick = null;
+        copyCtkmData = null;
+        fetchList();
+      } catch (e) {
+        alert(e);
+      } finally {
+        btn.innerHTML = 'LƯU TẤT CẢ';
+        btn.disabled = false;
+      }
+    }
+
+    function openPrintModal() {
+      const s = document.getElementById('print_system');
+      s.innerHTML = '<option value="">-- Chọn --</option>';
+      [...new Set(currentList.map(i => i.system))].sort().forEach(x => {
+        s.innerHTML += `<option value="${x}">${x}</option>`;
+      });
+
+      const b = document.getElementById('print_brand');
+      if (b) {
+        b.innerHTML = '<option value="">-- Tất cả --</option>';
+        [...new Set(currentList.map(i => i.brand).filter(Boolean))].sort().forEach(x => {
+          b.innerHTML += `<option value="${x}">${x}</option>`;
+        });
+      }
+      modalPrint.show();
+    }
+
+    function openPrintTimelineModal() {
+      // Populate print modal controls then show
+      populatePrintTimelineModalControls();
+      modalTimelinePrint.show();
+      // Load and preview timeline data
+      updateTimelinePreview();
+    }
+
+    function updateTimelinePreview() {
+      const view = document.querySelector('input[name="timeline_view"]:checked')?.value || 'system';
+      const previewArea = document.getElementById('timeline_preview_area');
+      
+      const listToUse = getPrintFilteredList();
+      if (!listToUse || !listToUse.length) {
+        previewArea.innerHTML = '<div class="text-center text-muted">Không có dữ liệu CTKM</div>';
+        return;
+      }
+
+      // Group data by month
+      const monthMap = {};
+      listToUse.forEach(item => {
+        // extract month/year robustly
+        let monthNum = item.month ? parseInt(item.month) : 0;
+        let yearNum = item.year ? parseInt(item.year) : 0;
+        if (!monthNum && item.start_date) {
+          const parts = String(item.start_date).split('-');
+          if (parts.length >= 2) {
+            yearNum = parseInt(parts[0]);
+            monthNum = parseInt(parts[1]);
+          }
+        }
+        if (!monthNum || isNaN(monthNum)) monthNum = 1;
+        if (!yearNum || isNaN(yearNum)) yearNum = new Date().getFullYear();
+        const key = `${yearNum}-${String(monthNum).padStart(2, '0')}`;
+        if (!monthMap[key]) monthMap[key] = [];
+        monthMap[key].push(item);
+      });
+
+      // Get last 4 months
+      const sortedMonths = Object.keys(monthMap).sort().reverse().slice(0, 4).sort();
+      
+      if (!sortedMonths.length) {
+        previewArea.innerHTML = '<div class="text-center text-muted">Không có dữ liệu trong 4 tháng gần nhất</div>';
+        return;
+      }
+
+      let html = '<div class="timeline-preview">';
+
+      // If print modal system/brand filters are set, show CTKM table instead of month grouping
+      const printSys = document.getElementById('print_tl_system_select') ? String(document.getElementById('print_tl_system_select').value || '').trim() : '';
+      const printBrand = document.getElementById('print_tl_brand_select') ? String(document.getElementById('print_tl_brand_select').value || '').trim() : '';
+
+      if (printSys || printBrand) {
+        // Build unique CTKM rows filtered by selected system/brand
+        const ctkmMap = {};
+        Object.keys(monthMap).forEach(k => {
+          monthMap[k].forEach(item => {
+            const sys = String(item.system || '').trim();
+            const br = String(item.brand || '').trim();
+            if (printSys && !(sys === printSys || sys.includes(printSys) || printSys.includes(sys))) return;
+            if (printBrand && !(br === printBrand || br.includes(printBrand) || printBrand.includes(br))) return;
+            const name = String(item.name || '').trim() || '(Không tên)';
+            if (!ctkmMap[name]) ctkmMap[name] = { system: sys, brand: br, items: [] };
+            ctkmMap[name].items.push(item);
+          });
+        });
+
+        // Render table
+        html += `<div class="table-responsive"><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Hệ thống</th><th>Tên CTKM</th><th>NGÀY KM</th><th>THỜI GIAN GIAO HÀNG KM</th></tr></thead><tbody>`;
+
+        const formatIso = (iso) => {
+          if (!iso) return '';
+          const p = String(iso).split('-');
+          if (p.length < 3) return iso;
+          return `${String(p[2]).padStart(2,'0')}/${String(p[1]).padStart(2,'0')}/${p[0]}`;
+        };
+
+        Object.keys(ctkmMap).sort().forEach(name => {
+          const info = ctkmMap[name];
+          const first = info.items[0];
+          const start = first.start_date || '';
+          const end = first.end_date || '';
+          const dateRange = start && end ? `${formatIso(start)} - ${formatIso(end)}` : '';
+          const del = first.delivery_str || '';
+          html += `<tr><td>${info.system}</td><td><strong>${name}</strong></td><td>${dateRange}</td><td>${del}</td></tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+      } else {
+        // Default month grouped view
+        sortedMonths.forEach(monthKey => {
+          const items = monthMap[monthKey];
+          const [year, month] = monthKey.split('-');
+          html += `<div class="mb-4">
+            <h6 class="fw-bold text-primary border-bottom pb-2">
+              <i class="fa-solid fa-calendar-days me-2"></i>Tháng ${parseInt(month)} / ${year}
+            </h6>`;
+          
+          if (view === 'system') {
+            // Group by system
+            const systemMap = {};
+            items.forEach(item => {
+              if (!systemMap[item.system]) systemMap[item.system] = [];
+              systemMap[item.system].push(item);
+            });
+            
+            Object.keys(systemMap).sort().forEach(sys => {
+              html += `<div class="ms-3 mb-2">
+                <div class="text-muted small"><strong>📍 ${sys}</strong></div>`;
+              systemMap[sys].forEach(item => {
+                html += `<div class="ms-3" style="font-size:12px">
+                  • ${item.name} (SKU: ${item.sku})
+                </div>`;
+              });
+              html += `</div>`;
+            });
+          } else {
+            // Group by SKU
+            const skuMap = {};
+            items.forEach(item => {
+              if (!skuMap[item.sku]) skuMap[item.sku] = [];
+              skuMap[item.sku].push(item);
+            });
+            
+            Object.keys(skuMap).sort().forEach(sku => {
+              html += `<div class="ms-3 mb-2">
+                <div class="text-muted small"><strong>🏷️ ${sku}</strong></div>`;
+              skuMap[sku].forEach(item => {
+                html += `<div class="ms-3" style="font-size:12px">
+                  • ${item.system} - ${item.name}
+                </div>`;
+              });
+              html += `</div>`;
+            });
+          }
+          
+          html += `</div>`;
+        });
+      }
+
+      html += '</div>';
+      previewArea.innerHTML = html;
+    }
+
+    async function executeTimelinePrint() {
+      const view = document.querySelector('input[name="timeline_view"]:checked')?.value || 'system';
+      const btn = document.querySelector('#printTimelineModal .btn-info');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang tạo PDF...';
+      btn.disabled = true;
+
+      try {
+        // Tạo dữ liệu để print
+        const monthMap = {};
+        const listToUse = getPrintFilteredList();
+        listToUse.forEach(item => {
+          // Extract tháng từ start_date (format: YYYY-MM-DD)
+          let monthNum = item.month ? parseInt(item.month) : 0;
+          let yearNum = item.year ? parseInt(item.year) : 0;
+          
+          if (!monthNum && item.start_date) {
+            const [dateYear, dateMonth, dateDay] = String(item.start_date).split('-');
+            monthNum = parseInt(dateMonth);
+            yearNum = parseInt(dateYear);
+          }
+          
+          // Fallback nếu vẫn không có
+          if (!monthNum || isNaN(monthNum)) monthNum = 1;
+          if (!yearNum || isNaN(yearNum)) yearNum = new Date().getFullYear();
+          
+          const key = `${yearNum}-${String(monthNum).padStart(2, '0')}`;
+          if (!monthMap[key]) monthMap[key] = [];
+          monthMap[key].push(item);
+        });
+
+        const sortedMonths = Object.keys(monthMap).sort().reverse().slice(0, 4).sort();
+        
+        const timelineData = {
+          viewMode: view,
+          months: sortedMonths.map(monthKey => {
+            const [year, month] = monthKey.split('-');
+            const items = monthMap[monthKey];
+            return {
+              year: parseInt(year),
+              month: parseInt(month),
+              items: items
+            };
+          })
+        };
+        // include print modal filters
+        const printSys = document.getElementById('print_tl_system_select') ? String(document.getElementById('print_tl_system_select').value || '').trim() : '';
+        const printBrand = document.getElementById('print_tl_brand_select') ? String(document.getElementById('print_tl_brand_select').value || '').trim() : '';
+        timelineData.printSystem = printSys;
+        timelineData.printBrand = printBrand;
+
+        console.log('Timeline data:', timelineData);
+
+        // Gửi request in PDF
+        const r = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'save_timeline_pdf', data: timelineData })
+        });
+        
+        const j = await r.json();
+        
+        if (j.success) {
+          alert('Đã in Timeline thành công!\nFile: ' + j.data.message);
+          modalTimelinePrint.hide();
+        } else {
+          alert('Lỗi: ' + (j.error || 'Không xác định'));
+        }
+      } catch (e) {
+        alert('Lỗi: ' + e);
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf me-1"></i>IN PDF';
+        btn.disabled = false;
+      }
+    }
+
+    function loadPrintCtkmList() {
+      const s = document.getElementById('print_system').value;
+      const b = document.getElementById('print_brand') ? document.getElementById('print_brand').value : '';
+      const c = document.getElementById('print_ctkm');
+
+      c.innerHTML = '<option>-- Chọn --</option>';
+      document.getElementById('sku_input_area').style.display = 'none';
+      const info = document.getElementById('print_timeline_info');
+      if (info) info.innerText = '';
+
+      if (!s) {
+        c.disabled = true;
+        return;
+      }
+
+      // So khớp hệ thống "mềm" (EMART, EMART GMS, LOTTE, LOTTE MART...) để tránh lệch tên
+      const cs = clean(s);
+      const cb = b ? clean(b) : '';
+
+      const u = [...new Set(
+        currentList
+          .filter(i => {
+            const sys = clean(i.system);
+            const br = clean(i.brand);
+            const matchSys = sys === cs || sys.includes(cs) || cs.includes(sys);
+            const matchBrand = !cb || br === cb || br.includes(cb) || cb.includes(br);
+            return matchSys && matchBrand;
+          })
+          .map(i => i.name)
+      )];
+      u.sort().forEach(n => {
+        c.innerHTML += `<option value="${n}">${n}</option>`;
+      });
+      c.disabled = false;
+    }
+
+    function renderSkuInputTable() {
+      const n = document.getElementById('print_ctkm').value;
+      const s = document.getElementById('print_system').value;
+      const b = document.getElementById('print_brand') ? document.getElementById('print_brand').value : '';
+      const t = document.getElementById('sku_input_tbody');
+
+      if (!n) {
+        document.getElementById('sku_input_area').style.display = 'none';
+        updatePrintTimelineInfo('');
+        return;
+      }
+
+      updatePrintTimelineInfo(n);
+
+      t.innerHTML = '';
+      
+      const cs = clean(s);
+      const cb = b ? clean(b) : '';
+
+      // So khớp tên CTKM theo dạng đã trim để tránh lệch dấu cách
+      currentList.filter(i => {
+        const sys = clean(i.system);
+        const br = clean(i.brand);
+        const matchSys = sys === cs || sys.includes(cs) || cs.includes(sys);
+        const matchBrand = !cb || br === cb || br.includes(cb) || cb.includes(br);
+        return String(i.name).trim() === String(n).trim() && matchSys && matchBrand;
+      }).forEach((i, idx) => {
+        t.innerHTML += `
+          <tr>
+            <td><b>${i.sku}</b></td>
+            <td><small>${i.promotion}</small></td>
+            <td><input type="number" class="form-control form-control-sm text-center qty-input" value="1000"></td>
+            <td><input type="text" class="form-control form-control-sm gift-input" value="${i.gift || ''}" placeholder=""></td>
+          </tr>`;
+      });
+
+      document.getElementById('sku_input_area').style.display = 'block';
+    }
+
+    // Hiển thị thông tin timeline khi chọn CTKM trong modal In & Tải File
+    function updatePrintTimelineInfo(name) {
+      const info = document.getElementById('print_timeline_info');
+      if (!info) return;
+
+      if (!name) {
+        info.innerText = '';
+        return;
+      }
+
+      const match = currentList.find(i => String(i.name).trim() === String(name).trim());
+      if (match && match.start_date && match.end_date) {
+        info.innerText = `Timeline: ${formatDate(match.start_date)} - ${formatDate(match.end_date)}`;
+      } else {
+        info.innerText = '';
+      }
+    }
+
+    function fmt(n) {
+      return n ? Number(n).toLocaleString('vi-VN') : '0';
+    }
+
+    function setBreadcrumb(mode, itemData) {
+      try {
+        const bc = document.getElementById('breadcrumb');
+        if (!bc) return;
+        
+        let breadcrumbText = '';
+        const icon = '<i class="fa-solid fa-sitemap me-1"></i>';
+        
+        if (itemData) {
+          // Show detailed breadcrumb with actual item data
+          const brand = String(itemData.brand || '').trim() || '?';
+          const system = String(itemData.system || '').trim() || '?';
+          const sku = String(itemData.sku || '').trim() || '?';
+          
+          if (mode === 'sku') {
+            breadcrumbText = `${icon}<strong>${sku}</strong> → ${system}`;
+          } else {
+            breadcrumbText = `${icon}${brand} → ${system} → <strong>${sku}</strong>`;
+          }
+        } else {
+          // Show mode label when no item is selected
+          if (mode === 'sku') {
+            breadcrumbText = `${icon}Nhãn → SKU → Hệ thống`;
+          } else {
+            breadcrumbText = `${icon}Nhãn → Hệ thống → SKU`;
+          }
+        }
+        
+        bc.innerHTML = breadcrumbText;
+      } catch (e) {}
+    }
+
+    function slug(t) {
+      return t.toString().toLowerCase()
+        .replace(/\s+/g,'-')
+        .replace(/[^\w\-]+/g,'');
+    }
+
+    // --- COPY CTKM (KÉO THẢ) ---
+    let copyCtkmData = null;
+
+    function openCopyCtkmModal(item, newStart, newEnd, allSkusParam = null) {
+      // Lấy TẤT CẢ SKU của CTKM cũ (từ tham số hoặc tự lấy)
+      let allSkus = allSkusParam;
+      if (!allSkus || !allSkus.length) {
+        allSkus = currentList.filter(i => 
+          String(i.name).trim().toUpperCase() === String(item.name).trim().toUpperCase() &&
+          clean(i.system) === clean(item.system)
+        );
+      }
+
+      if (!allSkus.length) {
+        alert('Không tìm thấy SKU trong CTKM này!');
+        return;
+      }
+
+      copyCtkmData = {
+        oldCtkmName: item.name,
+        newStart: newStart,
+        newEnd: newEnd,
+        system: item.system,
+        allSkus: allSkus
+      };
+
+      // Reset form
+      document.getElementById('promoForm').reset();
+      document.getElementById('editMode').value = 'create';
+      document.getElementById('modalTitle').innerText = 'Copy CTKM - Thêm Mới';
+
+      // Pre-fill thông tin cơ bản
+      const newMonth = newStart.getMonth() + 1;
+      const newYear = newStart.getFullYear();
+      document.getElementById('month').value = newMonth;
+      document.getElementById('year').value = newYear;
+      document.getElementById('system').value = item.system;
+
+      // Set thời gian mới
+      flatpickrInstance.setDate([newStart, newEnd]);
+
+      // Load brand và SKU
+      onSystemChange_Add();
+
+      // Lưu danh sách SKU cần tick (để dùng khi đổi brand)
+      // Bao gồm cả brand để có thể tick đúng khi đổi brand
+      window._copyCtkmSkusToTick = allSkus.map(s => ({
+        sku: String(s.sku || '').trim(),
+        brand: String(s.brand || '').trim(),
+        promotion: String(s.promotion || '').trim(),
+        gift: String(s.gift || '').trim()
+      }));
+
+      console.log('Copy CTKM - SKUs to tick:', window._copyCtkmSkusToTick.length, window._copyCtkmSkusToTick);
+
+      // Lấy tất cả brand từ CTKM
+      const allBrands = [...new Set(allSkus.map(s => s.brand).filter(Boolean))];
+      console.log('Copy CTKM - Brands:', allBrands);
+
+      // Đợi một chút để brand dropdown load xong
+      setTimeout(() => {
+        // Tìm brand từ SKU đầu tiên
+        const firstSku = allSkus[0];
+        if (firstSku && firstSku.brand) {
+          document.getElementById('brand').value = firstSku.brand;
+          onBrandChange_Add();
+
+          // Đợi SKU table load xong, rồi tick các SKU từ CTKM cũ
+          // Tăng timeout để đảm bảo DOM đã render xong
+          setTimeout(() => {
+            tickCopyCtkmSkus();
+            
+            // Nếu có nhiều brand, tick SKU từ các brand khác
+            if (allBrands.length > 1) {
+              console.log(`CTKM này có ${allBrands.length} brand: ${allBrands.join(', ')}. Đã tick SKU từ brand "${firstSku.brand}". Bạn có thể đổi brand để tick thêm SKU từ brand khác.`);
+              // Hiển thị thông báo cho user
+              const infoDiv = document.createElement('div');
+              infoDiv.className = 'alert alert-info mt-2';
+              infoDiv.innerHTML = `<strong>Lưu ý:</strong> CTKM này có ${allBrands.length} brand (${allBrands.join(', ')}). Đã tick SKU từ brand "${firstSku.brand}". Bạn có thể đổi brand ở trên để tick thêm SKU từ brand khác.`;
+              const form = document.getElementById('promoForm');
+              if (form) {
+                const existingAlert = form.querySelector('.alert-info');
+                if (existingAlert) existingAlert.remove();
+                form.appendChild(infoDiv);
+              }
+            }
+          }, 600);
+        } else {
+          // Nếu không có brand, vẫn tick SKU nếu có
+          setTimeout(() => {
+            tickCopyCtkmSkus();
+          }, 600);
+        }
+      }, 300);
+
+      // Load CTKM có sẵn trong tháng mới
+      onMonthYearChange();
+
+      modalData.show();
+    }
+
+    // --- DRAG & DROP CTKM (OLD - GIỮ LẠI ĐỂ TƯƠNG THÍCH) ---
+    let dragDropData = null;
+
+    function openDragDropModal(item, newStart, newEnd) {
+      dragDropData = {
+        oldItem: item,
+        newStart: newStart,
+        newEnd: newEnd
+      };
+
+      document.getElementById('dd_old_ctkm').innerText = `${item.name} (${item.system} - ${item.sku})`;
+      document.getElementById('dd_new_dates').innerText = 
+        `${formatDate(newStart)} đến ${formatDate(newEnd)}`;
+      document.getElementById('dd_new_ctkm').value = '';
+      document.getElementById('dd_existing_ctkm').innerHTML = 
+        '<option value="">-- Chọn CTKM có sẵn hoặc nhập tên mới --</option>';
+      document.getElementById('dd_delivery_offset').value = '0';
+
+      // Load CTKM có sẵn trong tháng mới
+      const newMonth = newStart.getMonth() + 1;
+      const newYear = newStart.getFullYear();
+      const sys = item.system;
+
+      const sel = document.getElementById('dd_existing_ctkm');
+      const names = new Set();
+
+      currentList.forEach(i => {
+        if (clean(i.system) !== clean(sys)) return;
+        const im = getMonthNumber(i.month);
+        const iy = parseInt(i.year, 10);
+        if (im === newMonth && iy === newYear) {
+          names.add(i.name);
+        }
+      });
+
+      [...names].sort().forEach(n => {
+        sel.innerHTML += `<option value="${n}">${n}</option>`;
+      });
+
+      const modalDragDrop = new bootstrap.Modal(document.getElementById('dragDropModal'));
+      modalDragDrop.show();
+    }
+
+    function onSelectDragDropCtkm() {
+      const n = document.getElementById('dd_existing_ctkm').value;
+      if (n) {
+        document.getElementById('dd_new_ctkm').value = n;
+      }
+    }
+
+    async function confirmDragDrop() {
+      if (!dragDropData) return;
+
+      const newCtkmName = document.getElementById('dd_new_ctkm').value.trim();
+      if (!newCtkmName) {
+        return alert('Nhập tên CTKM mới!');
+      }
+
+      const btn = document.querySelector('#dragDropModal .btn-primary');
+      btn.innerHTML = '...';
+      btn.disabled = true;
+
+      try {
+        const payload = {
+          oldCtkmName: dragDropData.oldItem.name,
+          newCtkmName: newCtkmName,
+          newStartDate: dragDropData.newStart.toISOString(),
+          newEndDate: dragDropData.newEnd.toISOString(),
+          system: dragDropData.oldItem.system,
+          sku: dragDropData.oldItem.sku,
+          deliveryOffset: parseInt(document.getElementById('dd_delivery_offset').value, 10)
+        };
+
+        const r = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'update_timeline', data: payload })
+        });
+
+        const j = await r.json();
+
+        if (j.success) {
+          alert(j.data.message || 'Đã cập nhật!');
+          const modalDragDrop = bootstrap.Modal.getInstance(document.getElementById('dragDropModal'));
+          modalDragDrop.hide();
+          await fetchList(); // Reload timeline
+        } else {
+          alert(j.error || 'Lỗi!');
+        }
+      } catch (e) {
+        alert('Lỗi: ' + e);
+      } finally {
+        btn.innerHTML = 'CẬP NHẬT';
+        btn.disabled = false;
+        dragDropData = null;
+      }
+    }
+
+    function formatDate(d) {
+      // Nếu không có ngày thì trả chuỗi trống để tránh hiện "..."
+      if (!d) return '';
+      const dt = new Date(d);
+      return `${dt.getDate()}/${dt.getMonth()+1}/${dt.getFullYear()}`;
+    }
+  </script>
+</body>
+</html>
