@@ -29,7 +29,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      padding: 10px;
+      padding: 8px;
       box-sizing: border-box;
     }
     #visualization {
@@ -146,21 +146,25 @@
       }
       
       h3 {
-        font-size: 18px !important;
+        font-size: 16px !important;
         text-align: center;
       }
       
       #visualization {
         flex: none;
-        height: 400px;
-        margin-bottom: 15px;
+        height: 450px;
+        margin-bottom: 10px;
       }
       
       /* Button responsive */
       .btn {
-        font-size: 12px !important;
-        padding: 6px 8px !important;
+        font-size: 10px !important;
+        padding: 4px 6px !important;
         white-space: nowrap;
+      }
+      
+      .btn i {
+        font-size: 12px;
       }
       
       .btn i {
@@ -179,9 +183,14 @@
       
       /* Breadcrumb responsive */
       #breadcrumb_area {
-        font-size: 12px !important;
-        padding: 8px !important;
-        margin-bottom: 10px !important;
+        font-size: 10px !important;
+        padding: 4px 6px !important;
+        margin-bottom: 4px !important;
+        min-height: 20px !important;
+      }
+      
+      #breadcrumb_area small {
+        font-size: 10px !important;
       }
       
       /* Modal responsive */
@@ -259,13 +268,13 @@
 
       /* Guideline legend badges */
       #breadcrumb_area .badge {
-        font-size: 9px !important;
-        padding: 2px 4px !important;
+        font-size: 8px !important;
+        padding: 1px 3px !important;
         white-space: nowrap;
       }
 
-      #breadcrumb_area .d-flex.gap-2 {
-        gap: 0.25rem !important;
+      #breadcrumb_area .d-flex {
+        gap: 0.2rem !important;
       }
 
       /* Card responsive */
@@ -289,7 +298,11 @@
       }
       
       #visualization {
-        height: 300px;
+        height: 350px;
+      }
+      
+      h3 {
+        font-size: 14px !important;
       }
       
       .btn {
@@ -462,47 +475,47 @@
 </head>
 <body>
   <div class="main-interface">
-    <div class="d-flex justify-content-between align-items-center mb-2" style="height: 40px;">
-      <h3 class="text-primary fw-bold m-0">
+    <div class="d-flex justify-content-between align-items-center mb-1" style="min-height: 36px;">
+      <h3 class="text-primary fw-bold m-0" style="font-size: 18px;">
         <i class="fa-solid fa-timeline"></i> Quản Lý CTKM
       </h3>
-      <div class="d-flex align-items-center gap-2">
-        <div class="me-2 d-flex align-items-center">
-          <select id="view_mode_select" class="form-select form-select-sm me-2" onchange="onViewModeChange()" title="Chọn cách hiển thị">
-            <option value="system">Hệ thống → SKU → Timeline</option>
-            <option value="sku">SKU → Hệ thống → Timeline</option>
+      <div class="d-flex align-items-center gap-1 flex-wrap">
+        <div class="d-flex align-items-center gap-1">
+          <select id="view_mode_select" class="form-select form-select-sm" onchange="onViewModeChange()" title="Chọn cách hiển thị" style="font-size: 11px; min-width: 100px;">
+            <option value="system">Hệ thống → SKU</option>
+            <option value="sku">SKU → Hệ thống</option>
           </select>
-          <small id="view_mode_label" class="me-2 text-muted" style="font-size:12px">Hệ thống → SKU → Timeline</small>
+          <small id="view_mode_label" class="text-muted d-none d-lg-inline" style="font-size:11px; white-space: nowrap;">Hệ thống → SKU</small>
 
           <!-- System filter -->
-          <select id="system_filter_select" class="form-select form-select-sm" onchange="onSystemFilterChange()" title="Lọc theo hệ thống">
-            <option value="">-- Tất cả hệ thống --</option>
+          <select id="system_filter_select" class="form-select form-select-sm" onchange="onSystemFilterChange()" title="Lọc hệ thống" style="font-size: 11px; min-width: 100px;">
+            <option value="">-- Tất cả --</option>
           </select>
         </div>
-        <div>
-        <button class="btn btn-success fw-bold shadow-sm me-2" onclick="openGuidelineModal()">
-          <i class="fa-solid fa-book"></i> GUIDELINE
+        <div class="d-flex gap-1 flex-wrap">
+        <button class="btn btn-success btn-sm fw-bold" onclick="openGuidelineModal()" style="padding: 4px 8px; font-size: 11px; white-space: nowrap;">
+          <i class="fa-solid fa-book"></i><span class="d-none d-sm-inline"> Guideline</span>
         </button>
-        <button class="btn btn-info fw-bold shadow-sm me-2" onclick="openPrintTimelineModal()">
-          <i class="fa-solid fa-file-pdf"></i> IN TIMELINE
+        <button class="btn btn-info btn-sm fw-bold" onclick="openPrintTimelineModal()" style="padding: 4px 8px; font-size: 11px; white-space: nowrap;">
+          <i class="fa-solid fa-file-pdf"></i><span class="d-none d-sm-inline"> Timeline</span>
         </button>
-        <button class="btn btn-warning fw-bold shadow-sm me-2" onclick="openPrintModal()">
-          <i class="fa-solid fa-print"></i> IN & TẢI FILE
+        <button class="btn btn-warning btn-sm fw-bold" onclick="openPrintModal()" style="padding: 4px 8px; font-size: 11px; white-space: nowrap;">
+          <i class="fa-solid fa-print"></i><span class="d-none d-sm-inline"> In File</span>
         </button>
-        <button class="btn btn-primary shadow-sm" onclick="openModal()">
-          <i class="fa-solid fa-plus"></i> Thêm Mới
+        <button class="btn btn-primary btn-sm fw-bold" onclick="openModal()" style="padding: 4px 8px; font-size: 11px; white-space: nowrap;">
+          <i class="fa-solid fa-plus"></i><span class="d-none d-sm-inline"> Thêm</span>
         </button>
         </div>
       </div>
     </div>
-    <div id="breadcrumb_area" class="mb-2 ps-2 d-flex justify-content-between align-items-center flex-wrap" style="min-height:26px; background:#f8f9fa; border-left:3px solid #0d6efd; border-radius:2px; padding-right: 8px;">
-      <small id="breadcrumb" class="text-secondary" style="font-size:13px">
+    <div id="breadcrumb_area" class="mb-1 ps-2 d-flex justify-content-between align-items-center flex-wrap" style="min-height:22px; background:#f8f9fa; border-left:3px solid #0d6efd; border-radius:2px; padding: 2px 8px 2px 8px;">
+      <small id="breadcrumb" class="text-secondary" style="font-size:11px; line-height: 1.2;">
         <i class="fa-solid fa-sitemap me-1"></i>Hệ thống → SKU → Timeline
       </small>
-      <div class="d-flex gap-2 align-items-center" style="font-size: 10px;">
-        <span class="badge" style="background-color: #e7f1ff; color: #000; border: 1px solid #0d6efd; padding: 3px 6px;">Không guideline</span>
-        <span class="badge" style="background-color: #d4edda; color: #000; border: 1px solid #28a745; padding: 3px 6px;">✓ Đúng guideline</span>
-        <span class="badge" style="background-color: #fff3cd; color: #000; border: 1px solid #ffc107; padding: 3px 6px;">⚠ Sai guideline</span>
+      <div class="d-flex gap-1 align-items-center" style="font-size: 9px;">
+        <span class="badge" style="background-color: #e7f1ff; color: #000; border: 1px solid #0d6efd; padding: 2px 4px;">Không GL</span>
+        <span class="badge" style="background-color: #d4edda; color: #000; border: 1px solid #28a745; padding: 2px 4px;">✓ Đúng GL</span>
+        <span class="badge" style="background-color: #fff3cd; color: #000; border: 1px solid #ffc107; padding: 2px 4px;">⚠ Sai GL</span>
       </div>
     </div>
     <div id="visualization"></div>
