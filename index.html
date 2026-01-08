@@ -1391,15 +1391,13 @@
           const sUnder = `${kTop}_s_${slug(item.system)}`;
 
           if (!processed.skus.has(kTop)) {
-            // Hiển thị SKU với note về hệ thống trong label
-            const skuLabel = `<div style="font-weight:700;font-size:9px;">${item.sku}</div><div style="font-size:7px;color:#6c757d;margin-top:2px;">Các hệ thống</div>`;
-            groups.add({ id: kTop, content: skuLabel, className: 'vis-group-level-sku', nestedGroups: [] });
+            groups.add({ id: kTop, content: item.sku, className: 'vis-group-level-sku', nestedGroups: [] });
             processed.skus.add(kTop);
           }
 
           if (!processed.systems.has(sUnder)) {
-            // Hiển thị tên system với indent
-            const systemLabel = `<div style="padding-left:8px;font-size:8px;">└ ${item.system}</div>`;
+            // Hiển thị: SKU | System để dễ nhìn
+            const systemLabel = `${item.sku} | ${item.system}`;
             groups.add({ id: sUnder, content: systemLabel, className: 'vis-group-level-system' });
             const g = groups.get(kTop);
             if (g && g.nestedGroups) g.nestedGroups.push(sUnder);
@@ -1496,12 +1494,6 @@
         tooltip: {
           followMouse: false,
           overflowMethod: 'cap'
-        },
-        // Template để render HTML trong group labels
-        groupTemplate: function(group) {
-          const container = document.createElement('div');
-          container.innerHTML = group.content;
-          return container;
         }
       };
 
