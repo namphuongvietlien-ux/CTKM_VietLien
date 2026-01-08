@@ -122,6 +122,38 @@
       z-index: 0;
     }
 
+    /* VIS-TIMELINE GROUP LABELS - Thu nhỏ phần tên bên trái */
+    .vis-label {
+      max-width: 150px !important;
+      min-width: 80px !important;
+      width: 150px !important;
+      font-size: 11px !important;
+      padding: 2px 4px !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .vis-labelset {
+      max-width: 150px !important;
+      width: 150px !important;
+    }
+
+    .vis-panel.vis-left {
+      max-width: 150px !important;
+      width: 150px !important;
+    }
+
+    .vis-group-level-sku .vis-label-text {
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .vis-group-level-system .vis-label-text,
+    .vis-group-level-brand .vis-label-text {
+      font-size: 10px;
+    }
+
     /* PRINT CSS */
     #printArea { display: none; }
 
@@ -290,6 +322,39 @@
         font-size: 12px !important;
         padding: 8px !important;
       }
+
+      /* Timeline labels - Mobile thu nhỏ hơn */
+      .vis-label {
+        max-width: 100px !important;
+        min-width: 60px !important;
+        width: 100px !important;
+        font-size: 10px !important;
+        padding: 2px 2px !important;
+      }
+      
+      .vis-labelset {
+        max-width: 100px !important;
+        width: 100px !important;
+      }
+
+      .vis-panel.vis-left {
+        max-width: 100px !important;
+        width: 100px !important;
+      }
+
+      /* Timeline items - smaller on mobile */
+      .item-sys {
+        font-size: 9px !important;
+      }
+      .item-sku {
+        font-size: 11px !important;
+      }
+      .item-promo {
+        font-size: 9px !important;
+      }
+      .item-price {
+        font-size: 10px !important;
+      }
     }
 
     @media (max-width: 480px) {
@@ -347,6 +412,20 @@
       #guideline_table_body th {
         font-size: 10px !important;
         padding: 3px 2px !important;
+      }
+
+      /* Timeline labels - Extra small screens */
+      .vis-label {
+        max-width: 70px !important;
+        min-width: 50px !important;
+        width: 70px !important;
+        font-size: 9px !important;
+      }
+      
+      .vis-labelset,
+      .vis-panel.vis-left {
+        max-width: 70px !important;
+        width: 70px !important;
       }
     }
 
