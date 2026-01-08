@@ -1401,25 +1401,21 @@
 
           item._groupId = `${sId}_k_${slug(item.sku)}`; // group id used for item
         } else if (mode === 'sku') {
-          // Top level: SKU groups
-          const kTop = `k_${slug(item.sku)}`;
-          const sUnder = `${kTop}_s_${slug(item.system)}`;
-
-          if (!processed.skus.has(kTop)) {
-            groups.add({ id: kTop, content: item.sku, className: 'vis-group-level-sku', nestedGroups: [] });
-            processed.skus.add(kTop);
+          // Flat structure: mỗi SKU + System là một group riêng
+          const groupKey = `sku_${slug(item.sku)}_sys_${slug(item.system)}`;
+          
+          if (!processed.systems.has(groupKey)) {
+            // Hiển thị đầy đủ: SKU | System
+            const label = `${item.sku} | ${item.system}`;
+            groups.add({ 
+              id: groupKey, 
+              content: label, 
+              className: 'vis-group-level-sku'
+            });
+            processed.systems.add(groupKey);
           }
 
-          if (!processed.systems.has(sUnder)) {
-            // Hiển thị: SKU | System để dễ nhìn
-            const systemLabel = `${item.sku} | ${item.system}`;
-            groups.add({ id: sUnder, content: systemLabel, className: 'vis-group-level-system' });
-            const g = groups.get(kTop);
-            if (g && g.nestedGroups) g.nestedGroups.push(sUnder);
-            processed.systems.add(sUnder);
-          }
-
-          item._groupId = sUnder;
+          item._groupId = groupKey;
         }
 
         let start = new Date(item.start_date);
